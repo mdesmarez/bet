@@ -11,6 +11,8 @@ PYTHON_NAME5=""
 function install_additional(){
 ### SPECIFIC SECTION MORE THAN GITFILE
 ##sudo apt-get install libmagickwand-dev
-
+curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
+sudo apt install nodejs
+npm i puppeteer
 }
 
