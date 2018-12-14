@@ -4,5 +4,6 @@ numpy
 scikit_learn
 scipy
 bs4
+dateparser
 matplotlib
 

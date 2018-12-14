@@ -356,6 +356,9 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
     dict_parameter_sport         = optimisation_5(df_merge_single, mod_value)
     df_single_filter             = optimisation_5_apply(df_single, dict_parameter_sport, mod_value)
     
+    if len(df_single_filter) == 0:
+        return
+    
     df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
     df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=1)) & (df_single_filter.match_date > datetime.now())]

@@ -10,19 +10,10 @@ Created on Fri Nov 30 17:25:19 2018
 # IMPORT PACKAGES
 # =============================================================================
 import os
-import urllib2
-import dateparser
-import time
 import datetime
-import re
-import ast
 
-import matplotlib.pyplot  as plt
 import pandas             as pd
-import numpy              as np
 
-from bs4                  import BeautifulSoup
-from glob                                                                      import glob
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
 
@@ -30,6 +21,13 @@ from PS3838_scrap_function                                                     i
 from PS3838_support_function                                                   import encode_decode, optimisation, optimisation_2, optimisation_3, optimisation_apply
 from PS3838_bet_function                                                       import ps3838_bet_simulator, ps3838_bet_parlay, ps3838_bet_single
 
+
+
+# =============================================================================
+# 
+# =============================================================================
+os.system('mkdir -p dataset/local')
+os.system('mkdir -p model/local')
 
 # =============================================================================
 # SCRAP
