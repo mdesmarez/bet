@@ -260,7 +260,7 @@ def optimisation_5(df_train, mod_value):
         df_train_sport = df_train[df_train.sport == sport]
 #        if sport == 'soccer': ee
 
-        if len(df_train_sport) > 1000:
+        if len(df_train_sport) > 600:
             df_train_sport.sort_values('min_bet', inplace=True)
             df_train_sport['mod'] = df_train_sport.min_bet/mod_value
             df_train_sport['mod'] = df_train_sport['mod'].apply(lambda x: int(x))

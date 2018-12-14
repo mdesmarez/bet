@@ -1,0 +1,9 @@
+Unidecode
+pandas
+numpy
+scikit_learn
+scipy
+bs4
+glob
+matplotlib
+
