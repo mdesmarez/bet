@@ -10,9 +10,7 @@ PYTHON_NAME5=""
 
 function install_additional(){
 ### SPECIFIC SECTION MORE THAN GITFILE
-sudo apt-get install libmagickwand-dev
-sudo apt-get install -y tzdata
-echo 'Import Spacy Model French'
-python -m spacy download fr
+##sudo apt-get install libmagickwand-dev
+
 }
 
