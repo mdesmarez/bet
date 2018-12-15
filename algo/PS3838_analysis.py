@@ -35,6 +35,7 @@ from PS3838_bet_function                                                       i
 # 
 # =============================================================================
 """
+
 os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_parlay.xls')
 os.system('mv df_parlay.xls df_parlay_server.xls')
 os.system('mv df_parlay_server.xls ../dataset/local/df_parlay_server.xls')
@@ -50,6 +51,7 @@ os.system('mv df_result_server.xls ../dataset/local/df_result_server.xls')
 os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_real_betting_single.xls')
 os.system('mv df_real_betting_single.xls df_real_betting_single_serveur.xls')
 os.system('mv df_real_betting_single_serveur.xls ../dataset/local/df_real_betting_single_serveur.xls')
+
 """
 # =============================================================================
 # 
@@ -317,7 +319,7 @@ total_result                = 0
 total_cave                  = 0
 
 list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-#list_day_shift              = [0, 1, 2]#3, 4, 5, 6, 7, 8, 9, 10]
+list_day_shift              = [0, 1, 2, 3]#, 4, 5, 6, 7, 8, 9, 10]
 
 list_day_shift.sort(reverse=True)
 dict_bankroll               = {}

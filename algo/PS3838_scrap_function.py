@@ -311,7 +311,7 @@ def ps3838_scrap_parlay():
                 ### GMT        
                 GMT                 = soup.find('span', { "id" : "current-time"}).text.strip()
                 GMT_value           = GMT[GMT.find('GMT+')+4:-3]
-                GMT_to_add          = int(GMT_value) - 1
+                GMT_to_add          = 1 - int(GMT_value)
                 
                 match_list          = []
                 match_list          = money_line_ligue_list.find_all('tr', { "class" : "status_I"}) + money_line_ligue_list.find_all('tr', { "class" : "status_O"})
@@ -434,7 +434,7 @@ def ps3838_scrap_single():
         ### GMT        
         GMT                 = soup.find('span', { "id" : "current-time"}).text.strip()
         GMT_value           = GMT[GMT.find('GMT+')+4:-3]
-        GMT_to_add          = int(GMT_value) - 1
+        GMT_to_add          = 1 - int(GMT_value)
         
         ###
         money_line_list      = soup.find_all('div', { "class" : "OneXTwo_0 "})
