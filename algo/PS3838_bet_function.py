@@ -427,7 +427,14 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
         os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
         date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
-        df_betting_single.to_csv('../dataset/local/Real_df_betting_single_' + date_bet_string + '.xls', encoding='utf-8')
+        
+        try:
+            df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+        except:
+            df_real_betting_single_done = pd.DataFrame()
+        df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single))
+        df_real_betting_single_done.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+    
     else:
         if len(df_single_filter_bulk) != 0:
             print '*****************************'
@@ -440,10 +447,3 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
             print str(datetime.now(pytz.utc)+timedelta(hours=1))
             print '*****************************'
     
-    df_real_betting_single_done = pd.DataFrame()
-    list_bet_single_done             = glob('../dataset/local/Real_df_betting_single*.xls')
-    for i, bet_single_done in enumerate(list_bet_single_done):
-        df_betting_single_done_temp = pd.DataFrame.from_csv(bet_single_done, encoding='utf-8')
-        df_betting_single_done_temp['bet_num'] = i 
-        df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single_done_temp))
-    df_real_betting_single_done.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
