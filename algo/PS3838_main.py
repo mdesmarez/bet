@@ -33,8 +33,8 @@ os.system('mkdir -p ../model/local')
 # SCRAP
 # =============================================================================
 ps3838_scrap_parlay()
-ps3838_scrap_single()
-ps3838_scrap_result()
+GMT_to_add = ps3838_scrap_single()
+ps3838_scrap_result(GMT_to_add)
 
 
 # =============================================================================

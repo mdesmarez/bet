@@ -34,6 +34,19 @@ from PS3838_bet_function                                                       i
 # =============================================================================
 # 
 # =============================================================================
+"""
+os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_parlay.xls')
+os.system('mv df_parlay.xls df_parlay_server.xls')
+os.system('mv df_parlay_server.xls ../dataset/local/df_parlay_server.xls')
+
+os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_single.xls')
+os.system('mv df_single.xls df_single_server.xls')
+os.system('mv df_single_server.xls ../dataset/local/df_single_server.xls')
+
+os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_result.xls')
+os.system('mv df_result.xls df_result_server.xls')
+os.system('mv df_result_server.xls ../dataset/local/df_result_server.xls')
+"""
 # =============================================================================
 # 
 # =============================================================================
@@ -70,12 +83,15 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 # =============================================================================
 # Prepare bet SINGLE
 # =============================================================================
-df_betting_single_done = pd.DataFrame()
-list_bet_single_done             = glob('../dataset/local/Real_df_betting_single*.xls')
-for i, bet_single_done in enumerate(list_bet_single_done):
-    df_betting_single_done_temp = pd.DataFrame.from_csv(bet_single_done, encoding='utf-8')
-    df_betting_single_done_temp['bet_num'] = i 
-    df_betting_single_done = pd.concat((df_betting_single_done, df_betting_single_done_temp))
+#df_betting_single_done = pd.DataFrame()
+#list_bet_single_done             = glob('../dataset/local/Real_df_betting_single*.xls')
+#for i, bet_single_done in enumerate(list_bet_single_done):
+#    df_betting_single_done_temp = pd.DataFrame.from_csv(bet_single_done, encoding='utf-8')
+#    df_betting_single_done_temp['bet_num'] = i 
+#    df_betting_single_done = pd.concat((df_betting_single_done, df_betting_single_done_temp))
+
+df_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+
 try:
     list_already_bet_single = df_betting_single_done.team_to_bet_id.unique().tolist()
 except:
@@ -132,7 +148,8 @@ for item in range(len(df_merge_single_bet)):
             result = result+(df_merge_single_bet.min_bet.iloc[item])*mise
         if draw_activated == 1 and df_merge_single_bet.winner.iloc[item] == 0:
             result = result+(df_merge_single_bet.bet_X.iloc[item])*mise
-    
+            df_merge_single_bet['good_pred'].iloc[item]  = 1
+            df_merge_single_bet['bad_pred'].iloc[item]   = 0
         if (df_merge_single_bet.good_pred.iloc[item] == 1) or (draw_activated == 1 and df_merge_single_bet.winner.iloc[item] == 0):
             num_good_pred = num_good_pred + 1
         else:
@@ -296,7 +313,7 @@ total_result                = 0
 total_cave                  = 0
 
 list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-#list_day_shift              = [0]#, 3, 4, 5, 6, 7, 8, 9, 10]
+list_day_shift              = [0, 1, 2]#3, 4, 5, 6, 7, 8, 9, 10]
 
 list_day_shift.sort(reverse=True)
 dict_bankroll               = {}
@@ -332,7 +349,7 @@ for day_shift in list_day_shift:
     
     
     for item in range(len(df_single_filter)):
-        if (df_single_filter.min_bet.iloc[item] < 2.1) and (draw_activated == 1):
+        if (df_single_filter.min_bet.iloc[item] < 2) and (draw_activated == 1):
             print df_single_filter.min_bet.iloc[item]
         else:
             

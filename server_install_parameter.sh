@@ -5,7 +5,7 @@ PYTHON_NAME2=""
 PYTHON_NAME3=""
 ### without nohup
 PYTHON_NAME4="PS3838_main.py"
-PYTHON_NAME5=""
+PYTHON_NAME5="PS3838_analysis.py"
 
 
 function install_additional(){

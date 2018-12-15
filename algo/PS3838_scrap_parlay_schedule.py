@@ -36,5 +36,5 @@ while True:
         pass
     print('****************   END  ****************')
     print str(datetime.now())
-    time.sleep(60*20)
+    time.sleep(60*10)
     

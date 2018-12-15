@@ -361,7 +361,7 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
     
     df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
-    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=1)) & (df_single_filter.match_date > datetime.now())]
+    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(minutes=20)) & (df_single_filter.match_date > datetime.now())]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
         
     # =============================================================================
@@ -438,3 +438,11 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
             print 'No single bet single'
             print str(datetime.now())
             print '*****************************'
+    
+    df_real_betting_single_done = pd.DataFrame()
+    list_bet_single_done             = glob('../dataset/local/Real_df_betting_single*.xls')
+    for i, bet_single_done in enumerate(list_bet_single_done):
+        df_betting_single_done_temp = pd.DataFrame.from_csv(bet_single_done, encoding='utf-8')
+        df_betting_single_done_temp['bet_num'] = i 
+        df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single_done_temp))
+    df_real_betting_single_done.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')

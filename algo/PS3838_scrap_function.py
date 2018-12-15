@@ -26,6 +26,7 @@ from bs4                  import BeautifulSoup
 from glob                                                                      import glob
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
+from dateutil.relativedelta                                                    import relativedelta
 
 from PS3838_support_function                                                   import encode_decode, optimisation, optimisation_2, optimisation_apply
 
@@ -33,7 +34,7 @@ from PS3838_support_function                                                   i
 # =============================================================================
 # 
 # =============================================================================
-def date_ajustement(df):
+def date_ajustement(df, GMT_to_add):
     df                = df.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
     df                = df.apply(lambda x : datetime.strptime(x.replace('nov.','11'), '%Y %d %m%H:%M') if str(x)[8:12]=='nov.' else x)
     
@@ -45,15 +46,32 @@ def date_ajustement(df):
 
     df                = df.apply(lambda x : datetime.strptime(x.replace('Feb','02'), '%Y %m %d%H:%M') if str(x)[5:8]=='Feb' else x)
     df                = df.apply(lambda x : datetime.strptime(x.replace('feb.','02'), '%Y %d %m%H:%M') if str(x)[8:12]=='feb.' else x)
+
+    df                = df.apply(lambda x : datetime.strptime(x.replace('Mar','03'), '%Y %m %d%H:%M') if str(x)[5:8]=='Mar' else x)
+    df                = df.apply(lambda x : datetime.strptime(x.replace('mar.','03'), '%Y %d %m%H:%M') if str(x)[8:12]=='mar.' else x)
+
+    df                = df.apply(lambda x : datetime.strptime(x.replace('Apr','04'), '%Y %m %d%H:%M') if str(x)[5:8]=='Apr' else x)
+    df                = df.apply(lambda x : datetime.strptime(x.replace('apr.','04'), '%Y %d %m%H:%M') if str(x)[8:12]=='apr.' else x)
+
+    df                = df.apply(lambda x : datetime.strptime(x.replace('May','05'), '%Y %m %d%H:%M') if str(x)[5:8]=='May' else x)
+    df                = df.apply(lambda x : datetime.strptime(x.replace('may.','05'), '%Y %d %m%H:%M') if str(x)[8:12]=='may.' else x)
+
+    df                = df.apply(lambda x : datetime.strptime(x.replace('Jun','06'), '%Y %m %d%H:%M') if str(x)[5:8]=='Jun' else x)
+    df                = df.apply(lambda x : datetime.strptime(x.replace('jun.','06'), '%Y %d %m%H:%M') if str(x)[8:12]=='jun.' else x)
+
+    df                = df.apply(lambda x : datetime.strptime(x.replace('Jul','07'), '%Y %m %d%H:%M') if str(x)[5:8]=='Jul' else x)
+    df                = df.apply(lambda x : datetime.strptime(x.replace('jul.','07'), '%Y %d %m%H:%M') if str(x)[8:12]=='jul.' else x)
     
     df                = df.apply(lambda x : str(x))
-    df                = df.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+    df                = df.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S') + timedelta(hours=GMT_to_add))
+
+    df                = df.apply(lambda x : x+ relativedelta(years=1) if (x.year==2018 and x.month<9) else x)
 
     return df
 # =============================================================================
 # 
 # =============================================================================
-def ps3838_scrap_result():
+def ps3838_scrap_result(GMT_to_add):
     df_parlay = pd.DataFrame.from_csv('../dataset/local/df_parlay.xls', encoding='utf-8')
     list_sport = df_parlay.sport.unique().tolist()
     list_sport = ','.join(list_sport)
@@ -83,7 +101,7 @@ def ps3838_scrap_result():
             if teams != []:
                 if str(match).find('display:none') == -1:
                     match_date  = str(datetime.now().year) + ' ' + match.find('td', { "class" : "date"}).text
-                    match_date  = datetime.strptime(match_date, '%Y %m/%d %H:%M')
+                    match_date  = datetime.strptime(match_date, '%Y %m/%d %H:%M') + timedelta(hours=GMT_to_add)
                     score       = match.find('td', { "class" : "period"}).text
                     team_home   = teams[0].text
                     team_away   = teams[1].text
@@ -163,6 +181,10 @@ def ps3838_scrap_parlay():
             for i, ligue in enumerate(ligue_list):
                 money_line_ligue_list = money_line_list.find_all('table', { "class" : "o_table events"})[i]
                 
+                ### GMT        
+                GMT                 = soup.find('span', { "id" : "current-time"}).text.strip()
+                GMT_value           = GMT[GMT.find('GMT+')+4:-3]
+                GMT_to_add          = int(GMT_value) - 1
                 
                 match_list          = []
                 match_list          = money_line_ligue_list.find_all('tr', { "class" : "status_I"}) + money_line_ligue_list.find_all('tr', { "class" : "status_O"})
@@ -247,7 +269,7 @@ def ps3838_scrap_parlay():
     df_parlay['min_bet']               = df_parlay[['bet_1','bet_2']].min(axis=1)
     
     ###
-    df_parlay.match_date  = date_ajustement(df_parlay.match_date)
+    df_parlay.match_date  = date_ajustement(df_parlay.match_date, GMT_to_add)
     
     ###
     """
@@ -286,6 +308,10 @@ def ps3838_scrap_parlay():
             for i, ligue in enumerate(ligue_list):
                 money_line_ligue_list = money_line_list.find_all('table', { "class" : "o_table events"})[i]
                 
+                ### GMT        
+                GMT                 = soup.find('span', { "id" : "current-time"}).text.strip()
+                GMT_value           = GMT[GMT.find('GMT+')+4:-3]
+                GMT_to_add          = int(GMT_value) - 1
                 
                 match_list          = []
                 match_list          = money_line_ligue_list.find_all('tr', { "class" : "status_I"}) + money_line_ligue_list.find_all('tr', { "class" : "status_O"})
@@ -369,7 +395,7 @@ def ps3838_scrap_parlay():
     df_parlay['bet_diff']              = abs(df_parlay.bet_1 - df_parlay.bet_2)
     df_parlay['min_bet']               = df_parlay[['bet_1','bet_2']].min(axis=1)
     
-    df_parlay.match_date  = date_ajustement(df_parlay.match_date)
+    df_parlay.match_date  = date_ajustement(df_parlay.match_date, GMT_to_add)
     ###
     """
     df_parlay.match_date                = df_parlay.match_date.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
@@ -404,7 +430,13 @@ def ps3838_scrap_single():
     for single in list_single:
         print single
         soup                = BeautifulSoup(open(single), "html.parser")
+    
+        ### GMT        
+        GMT                 = soup.find('span', { "id" : "current-time"}).text.strip()
+        GMT_value           = GMT[GMT.find('GMT+')+4:-3]
+        GMT_to_add          = int(GMT_value) - 1
         
+        ###
         money_line_list      = soup.find_all('div', { "class" : "OneXTwo_0 "})
         
         
@@ -493,7 +525,7 @@ def ps3838_scrap_single():
     df_single['min_bet']               = df_single[['bet_1','bet_2']].min(axis=1)
     
     ###
-    df_single.match_date  = date_ajustement(df_single.match_date)
+    df_single.match_date  = date_ajustement(df_single.match_date, GMT_to_add)
 
     """
     ###
@@ -511,6 +543,6 @@ def ps3838_scrap_single():
     
     df_single.to_csv('../dataset/local/df_single.xls', encoding='utf-8')
 
-
+    return GMT_to_add
 
     
