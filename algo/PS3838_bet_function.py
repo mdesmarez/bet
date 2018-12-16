@@ -17,7 +17,6 @@ import datetime
 import re
 import ast
 import warnings
-import pytz
     
 import matplotlib.pyplot  as plt
 import pandas             as pd
@@ -83,7 +82,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR SINGLE'
         df_betting_simulator_single = df_parlay_filter_simulator_single[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator_single = df_betting_simulator_single.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator_single.to_csv('../dataset/local/df_betting_simulatorsingle_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -119,7 +118,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR 2'
         df_betting_simulator_2 = df_parlay_filter_simulator_2[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator_2 = df_betting_simulator_2.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator_2.to_csv('../dataset/local/df_betting_simulator2_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -155,7 +154,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR 3'
         df_betting_simulator = df_parlay_filter_simulator[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator = df_betting_simulator.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator.to_csv('../dataset/local/df_betting_simulator_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -192,7 +191,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR 5'
         df_betting_simulator_5 = df_parlay_filter_simulator_5[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator_5 = df_betting_simulator_5.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator_5.to_csv('../dataset/local/df_betting_simulator5_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -229,7 +228,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR 7'
         df_betting_simulator_7 = df_parlay_filter_simulator_7[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator_7 = df_betting_simulator_7.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator_7.to_csv('../dataset/local/df_betting_simulator7_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -266,7 +265,7 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
         print 'OK TO SIMULATOR 10'
         df_betting_simulator_10 = df_parlay_filter_simulator_10[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','team_to_bet_id','team_home']]
         df_betting_simulator_10 = df_betting_simulator_10.iloc[0:number_bet]
-        date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+        date_bet = datetime.now()+timedelta(hours=GMT_to_add)
         date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
         df_betting_simulator_10.to_csv('../dataset/local/df_betting_simulator10_' + date_bet_string + '.xls', encoding='utf-8')
     else:
@@ -318,12 +317,12 @@ def ps3838_bet_parlay(df_betting_parlay):
     team_to_bet_id = str(df_betting_parlay.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
     sport_to_bet   = str(df_betting_parlay.sport.tolist())[1:-1].replace('u','').replace("'","")
     os.system('node ps3838_place_bet_parlay_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
-    date_bet = datetime.now(pytz.utc)+timedelta(hours=1)
+    date_bet = datetime.now()+timedelta(hours=GMT_to_add)
     date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
     df_betting_parlay.to_csv('../dataset/local/Real_df_betting_parlay_' + date_bet_string + '.xls', encoding='utf-8')
 
 
-def ps3838_bet_single(df_single, df_merge_single):
+def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     warnings.filterwarnings('ignore')
 
     df_merge_single['sport'] = df_merge_single['sport'].apply(lambda x : x.lower()) 
@@ -344,14 +343,14 @@ def ps3838_bet_single(df_single, df_merge_single):
     
     df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
-    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now(pytz.utc)+timedelta(hours=1)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now(pytz.utc)+timedelta(hours=1))]
+    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
         
     # =============================================================================
     # Print opportunity SINGLE
     # =============================================================================
     print '*****************************'
-    print str(datetime.now(pytz.utc)+timedelta(hours=1))
+    print str(datetime.now()+timedelta(hours=GMT_to_add))
     df_single_filter.sort_values('bet_diff', ascending=False, inplace=True)
     print 'df_single_filter : ', len(df_single_filter)
     print '*****************************'
@@ -388,7 +387,7 @@ def ps3838_bet_single(df_single, df_merge_single):
             if i > 0:
                 bet_single = bet_single*df_betting_single.min_bet.iloc[i]
         print 'bet_single : ', bet_single
-        print str(datetime.now(pytz.utc)+timedelta(hours=1))
+        print str(datetime.now()+timedelta(hours=GMT_to_add))
         print '*****************************'
     
         # =============================================================================
@@ -424,12 +423,12 @@ def ps3838_bet_single(df_single, df_merge_single):
         if len(df_single_filter_bulk) != 0:
             print '*****************************'
             print 'All Single bet already placed'
-            print str(datetime.now(pytz.utc)+timedelta(hours=1))
+            print str(datetime.now()+timedelta(hours=GMT_to_add))
             print '*****************************'
         else:
             print '*****************************'
             print 'No single bet single'
-            print str(datetime.now(pytz.utc)+timedelta(hours=1))
+            print str(datetime.now()+timedelta(hours=GMT_to_add))
             print '*****************************'
     
     return dict_parameter_sport

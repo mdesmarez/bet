@@ -5,7 +5,7 @@ const chrome = { x: 0, y: 74 };   // comes from config in reality
 const width = 1200;
 const height = 960;
 
-const invisible_nav = false
+const invisible_nav = true
 
 var args = process.argv.slice(2);
 console.log(args[0])

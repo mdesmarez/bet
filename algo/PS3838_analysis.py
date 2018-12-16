@@ -55,6 +55,14 @@ os.system('mv df_real_betting_single_serveur.xls ../dataset/local/df_real_bettin
 
 
 df_single_server = pd.DataFrame.from_csv('../dataset/local/df_single_server.xls', encoding='utf-8')
+df_parlay_server = pd.DataFrame.from_csv('../dataset/local/df_parlay_server.xls', encoding='utf-8')
+df_result_server = pd.DataFrame.from_csv('../dataset/local/df_result_server.xls', encoding='utf-8')
+df_real_betting_single_serveur = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single_serveur.xls', encoding='utf-8')
+
+df_single = pd.DataFrame.from_csv('../dataset/local/df_single.xls', encoding='utf-8')
+df_parlay = pd.DataFrame.from_csv('../dataset/local/df_parlay.xls', encoding='utf-8')
+df_result = pd.DataFrame.from_csv('../dataset/local/df_result.xls', encoding='utf-8')
+df_real_betting_single = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
 
 """
 # =============================================================================
