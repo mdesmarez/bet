@@ -447,3 +447,4 @@ def ps3838_bet_single(df_single, df_merge_single, draw_activated):
             print str(datetime.now(pytz.utc)+timedelta(hours=1))
             print '*****************************'
     
+    return dict_parameter_sport

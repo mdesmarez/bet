@@ -34,7 +34,16 @@ from PS3838_support_function                                                   i
 # =============================================================================
 # 
 # =============================================================================
-def date_ajustement(df, GMT_to_add):
+def date_ajustement_str(match_date, GMT_to_add):
+    dict_match_date = {'eee':{'match_date':match_date}}
+    df = pd.DataFrame.from_dict(dict_match_date, orient='index')
+    df.match_date = date_ajustement(df.match_date)
+    df.match_date = hour_GMT_ajustement(df.match_date, GMT_to_add)
+    match_date = df.match_date.values[0]
+    return match_date
+
+
+def date_ajustement(df):
     df                = df.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
     df                = df.apply(lambda x : datetime.strptime(x.replace('nov.','11'), '%Y %d %m%H:%M') if str(x)[8:12]=='nov.' else x)
     
@@ -63,11 +72,18 @@ def date_ajustement(df, GMT_to_add):
     df                = df.apply(lambda x : datetime.strptime(x.replace('jul.','07'), '%Y %d %m%H:%M') if str(x)[8:12]=='jul.' else x)
     
     df                = df.apply(lambda x : str(x))
-    df                = df.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S') + timedelta(hours=GMT_to_add))
+    df                = df.apply(lambda x : x.replace('T',' ').replace('.000000000',''))
+    df                = df.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
     df                = df.apply(lambda x : x+ relativedelta(years=1) if (x.year==2018 and x.month<9) else x)
 
     return df
+
+def hour_GMT_ajustement(df, GMT_to_add):
+    df                = df.apply(lambda x : str(x))
+    df                = df.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S') + timedelta(hours=GMT_to_add))
+    return df
+
 # =============================================================================
 # 
 # =============================================================================
@@ -234,6 +250,8 @@ def ps3838_scrap_parlay():
                     team_away           = encode_decode(team_away)
                     match_name          = encode_decode(match_name)
     
+                    match_date = date_ajustement_str(match_date, GMT_to_add)
+
                     dict_odds.update({match_name:{
                                                 'match_date' : match_date,
                                                 'team_home'  : team_home,
@@ -258,7 +276,7 @@ def ps3838_scrap_parlay():
         dict_odds_new.update({k:v}) 
         
     df_parlay               = pd.DataFrame.from_dict(dict_odds_new, orient='index')
-    df_parlay.drop_duplicates(inplace=True)
+    df_parlay.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
     
     ###
     df_parlay.bet_1 = df_parlay.bet_1.astype(float)
@@ -269,7 +287,7 @@ def ps3838_scrap_parlay():
     df_parlay['min_bet']               = df_parlay[['bet_1','bet_2']].min(axis=1)
     
     ###
-    df_parlay.match_date  = date_ajustement(df_parlay.match_date, GMT_to_add)
+    df_parlay.match_date  = date_ajustement(df_parlay.match_date)
     
     ###
     """
@@ -360,7 +378,9 @@ def ps3838_scrap_parlay():
                     team_home           = encode_decode(team_home)
                     team_away           = encode_decode(team_away)
                     match_name          = encode_decode(match_name)
-    
+                    
+                    match_date = date_ajustement_str(match_date, GMT_to_add)
+
                     dict_odds.update({match_name:{
                                                 'match_date' : match_date,
                                                 'team_home'  : team_home,
@@ -385,7 +405,8 @@ def ps3838_scrap_parlay():
         dict_odds_new.update({k:v}) 
         
     df_parlay               = pd.DataFrame.from_dict(dict_odds_new, orient='index')
-    df_parlay.drop_duplicates(inplace=True)
+    df_parlay.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
+
     
     ###
     df_parlay.bet_1 = df_parlay.bet_1.astype(float)
@@ -395,7 +416,7 @@ def ps3838_scrap_parlay():
     df_parlay['bet_diff']              = abs(df_parlay.bet_1 - df_parlay.bet_2)
     df_parlay['min_bet']               = df_parlay[['bet_1','bet_2']].min(axis=1)
     
-    df_parlay.match_date  = date_ajustement(df_parlay.match_date, GMT_to_add)
+    df_parlay.match_date  = date_ajustement(df_parlay.match_date)
     ###
     """
     df_parlay.match_date                = df_parlay.match_date.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
@@ -488,7 +509,10 @@ def ps3838_scrap_single():
                     team_home           = encode_decode(team_home)
                     team_away           = encode_decode(team_away)
                     match_name          = encode_decode(match_name)
-    
+
+                    ### ADJUST TO GMT
+                    match_date = date_ajustement_str(match_date, GMT_to_add)
+                    
                     dict_odds.update({match_name:{
                                                 'match_date' : match_date,
                                                 'team_home'  : team_home,
@@ -514,7 +538,7 @@ def ps3838_scrap_single():
         dict_odds_new.update({k:v}) 
         
     df_single               = pd.DataFrame.from_dict(dict_odds_new, orient='index')
-    df_single.drop_duplicates(inplace=True)
+    df_single.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
     
     ###
     df_single.bet_1 = df_single.bet_1.astype(float)
@@ -525,7 +549,7 @@ def ps3838_scrap_single():
     df_single['min_bet']               = df_single[['bet_1','bet_2']].min(axis=1)
     
     ###
-    df_single.match_date  = date_ajustement(df_single.match_date, GMT_to_add)
+    df_single.match_date  = date_ajustement(df_single.match_date)
 
     """
     ###

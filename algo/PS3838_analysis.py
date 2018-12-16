@@ -16,6 +16,7 @@ import time
 import datetime
 import re
 import ast
+import sys
 
 import matplotlib.pyplot  as plt
 import pandas             as pd
@@ -51,6 +52,9 @@ os.system('mv df_result_server.xls ../dataset/local/df_result_server.xls')
 os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_real_betting_single.xls')
 os.system('mv df_real_betting_single.xls df_real_betting_single_serveur.xls')
 os.system('mv df_real_betting_single_serveur.xls ../dataset/local/df_real_betting_single_serveur.xls')
+
+
+df_single_server = pd.DataFrame.from_csv('../dataset/local/df_single_server.xls', encoding='utf-8')
 
 """
 # =============================================================================
@@ -137,7 +141,7 @@ num_good_pred   = 0
 num_bad_pred    = 0
     
 for item in range(len(df_merge_single_bet)):
-    if (df_merge_single_bet.min_bet.iloc[item] < 2.1) and (draw_activated == 1):
+    if (df_merge_single_bet.min_bet.iloc[item] < 1.1) and (draw_activated == 1):
         pass
     else:
         if draw_activated == 1:
@@ -162,14 +166,12 @@ for item in range(len(df_merge_single_bet)):
             num_bad_pred = num_bad_pred + 1
                 
 
-
-
-
 print('******** RESULT SIMULATION **********')
 print 'Number bet engaged : ', len(df_betting_single_done)
 print 'Cave engaged       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise*2
-print 'Number Good pred : ', num_good_pred
-print 'Number Bad pred  : ', num_bad_pred
+print 'Bet engaged        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
+print 'Number Good pred   : ', num_good_pred
+print 'Number Bad pred    : ', num_bad_pred
 print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred)*100,2), '%'
 print ''
 print 'cave     : ', int(cave),' €'
@@ -178,6 +180,7 @@ print 'ROI cave : ', round(result/float(cave)*100,2), '%'
 print round(result/mise,2)*100,"%"
 print('*************************************')
 print ''
+
 
 
 #dict_bankroll = {}
@@ -319,7 +322,7 @@ total_result                = 0
 total_cave                  = 0
 
 list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-list_day_shift              = [0, 1, 2, 3]#, 4, 5, 6, 7, 8, 9, 10]
+#list_day_shift              = [0, 1, 2, 3]#, 4, 5, 6, 7, 8, 9, 10]
 
 list_day_shift.sort(reverse=True)
 dict_bankroll               = {}
@@ -355,7 +358,7 @@ for day_shift in list_day_shift:
     
     
     for item in range(len(df_single_filter)):
-        if (df_single_filter.min_bet.iloc[item] < 2.1) and (draw_activated == 1):
+        if (df_single_filter.min_bet.iloc[item] < 1.1) and (draw_activated == 1):
             print df_single_filter.min_bet.iloc[item]
         else:
             

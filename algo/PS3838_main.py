@@ -20,7 +20,7 @@ from datetime                                                                  i
 from PS3838_scrap_function                                                     import ps3838_scrap_parlay, ps3838_scrap_single, ps3838_scrap_result
 from PS3838_support_function                                                   import encode_decode, optimisation, optimisation_2, optimisation_3, optimisation_apply
 from PS3838_bet_function                                                       import ps3838_bet_simulator, ps3838_bet_parlay, ps3838_bet_single
-
+from PS3838_dashboard                                                          import dashboard
 
 
 # =============================================================================
@@ -70,8 +70,8 @@ df_merge_single.bad_pred[df_merge_single.prediction != df_merge_single.winner]  
 df_merge_single.match_date                = df_merge_single.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
 draw_activated = 0
-ps3838_bet_single(df_single, df_merge_single, draw_activated)
-    
+dict_parameter_sport = ps3838_bet_single(df_single, df_merge_single, draw_activated)
+dashboard(dict_parameter_sport)
 
 """
 # =============================================================================

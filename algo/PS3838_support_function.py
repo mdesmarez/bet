@@ -260,7 +260,7 @@ def optimisation_5(df_train, mod_value):
         df_train_sport = df_train[df_train.sport == sport]
 #        if sport == 'soccer': ee
 
-        if len(df_train_sport) > 600:
+        if len(df_train_sport) > 500:
             df_train_sport.sort_values('min_bet', inplace=True)
             df_train_sport['mod'] = df_train_sport.min_bet/mod_value
             df_train_sport['mod'] = df_train_sport['mod'].apply(lambda x: int(x))
@@ -278,7 +278,7 @@ def optimisation_5(df_train, mod_value):
                 perc_mod = sum_good/float(sum_bad+sum_good)*100
                 mod_performance.append(perc_mod)
         
-                if len(df_train_mod)>5 and perc_mod*((mod-1)*mod_value)-100>0:
+                if len(df_train_mod)>5 and perc_mod*((mod-1)*mod_value)-99.5>0:
                     list_mod_ok.append([(mod-1)*mod_value, mod*mod_value, len(df_train_mod), mod, perc_mod, perc_mod*((mod-1)*mod_value)-100])
                     count = count + len(df_train_mod)
                     dict_temp.update({sport:list_mod_ok})
