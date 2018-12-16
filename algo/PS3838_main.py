@@ -69,8 +69,8 @@ df_merge_single['bad_pred']               = 0
 df_merge_single.bad_pred[df_merge_single.prediction != df_merge_single.winner]  = 1
 df_merge_single.match_date                = df_merge_single.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
-draw_activated = 0
-dict_parameter_sport = ps3838_bet_single(df_single, df_merge_single, draw_activated)
+
+dict_parameter_sport = ps3838_bet_single(df_single, df_merge_single)
 dashboard(dict_parameter_sport)
 
 """

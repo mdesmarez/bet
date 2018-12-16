@@ -288,7 +288,8 @@ def ps3838_scrap_parlay():
     
     ###
     df_parlay.match_date  = date_ajustement(df_parlay.match_date)
-    
+    df_parlay.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
+
     ###
     """
     df_parlay.match_date                = df_parlay.match_date.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
@@ -417,6 +418,8 @@ def ps3838_scrap_parlay():
     df_parlay['min_bet']               = df_parlay[['bet_1','bet_2']].min(axis=1)
     
     df_parlay.match_date  = date_ajustement(df_parlay.match_date)
+    df_parlay.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
+
     ###
     """
     df_parlay.match_date                = df_parlay.match_date.apply(lambda x : datetime.strptime(x.replace('Nov','11'), '%Y %m %d%H:%M') if str(x)[5:8]=='Nov' else x)
@@ -550,6 +553,7 @@ def ps3838_scrap_single():
     
     ###
     df_single.match_date  = date_ajustement(df_single.match_date)
+    df_single.drop_duplicates(subset=['match_date','team_away','team_home','sport'], inplace=True)
 
     """
     ###

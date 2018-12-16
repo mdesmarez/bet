@@ -309,7 +309,7 @@ df_parlay_filter[df_parlay_filter.good_pred == 1].min_bet.mean()
 
 #%%
 
-from PS3838_support_function  import optimisation_4, optimisation_4_apply, optimisation_5, optimisation_5_apply
+from PS3838_support_function  import optimisation_6, optimisation_6_apply, optimisation_5, optimisation_5_apply
 
 mise                        = 5
 draw_activated              = 1
@@ -335,22 +335,24 @@ for day_shift in list_day_shift:
     date_min = datetime.now()-timedelta(hours=24*day_shift) - timedelta(hours=24*day_train)
     date_max = datetime.now()-timedelta(hours=24*day_shift)
     
-    hour_test = 23
+    hour_test = 01
     date_min = date_min.replace(hour=hour_test, minute=00, second=00)
     date_max = date_max.replace(hour=hour_test, minute=00, second=00)
     
     df_train    = df_merge_single[(df_merge_single.match_date < date_min)]
     df_test     = df_merge_single[(df_merge_single.match_date >= date_min) & (df_merge_single.match_date <= date_max)]
     
-    df_test = df_test[df_test.sport == 'soccer']
+#    df_test = df_test[df_test.sport == 'soccer']
 
-
+    
     print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
     print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
     print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')
     
-    dict_parameter_sport = optimisation_5(df_train, mod_value)
-    df_single_filter = optimisation_5_apply(df_test, dict_parameter_sport, mod_value)
+    dict_parameter_sport = optimisation_6(df_train, mod_value)
+    df_single_filter = optimisation_6_apply(df_test, dict_parameter_sport, mod_value)
+
+#    dict_parameter_sport         = optimisation_6(df_merge_single, mod_value)
 
 
     num_good_pred   = 0
@@ -358,6 +360,31 @@ for day_shift in list_day_shift:
     
     
     for item in range(len(df_single_filter)):
+        if (df_single_filter.min_bet.iloc[item] > 1.):
+            if df_single_filter.mode_bet.iloc[item] == 'X':
+                cave = cave + mise*2
+                result = result - mise*2
+                if df_single_filter.good_pred.iloc[item] == 1:
+                    result = result + df_single_filter.min_bet.iloc[item]*mise
+                    num_good_pred = num_good_pred + 1
+                if df_single_filter.winner.iloc[item] == 0:
+                    result = result + df_single_filter.bet_X.iloc[item]*mise
+                    num_good_pred = num_good_pred + 1
+                if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                    num_bad_pred = num_bad_pred + 1
+    
+    
+            if df_single_filter.mode_bet.iloc[item] == 'S':
+                cave = cave + mise
+                result = result - mise
+                if df_single_filter.good_pred.iloc[item] == 1:
+                    result = result + df_single_filter.min_bet.iloc[item]*mise
+                    num_good_pred = num_good_pred + 1
+                else:
+                    num_bad_pred = num_bad_pred + 1
+
+        
+        """
         if (df_single_filter.min_bet.iloc[item] < 1.1) and (draw_activated == 1):
             print df_single_filter.min_bet.iloc[item]
         else:
@@ -381,13 +408,13 @@ for day_shift in list_day_shift:
                 num_good_pred = num_good_pred + 1
             else:
                 num_bad_pred = num_bad_pred + 1
-                
+        """        
     
     if len(df_single_filter) != 0:
         print('******** RESULT SIMULATION **********')
         print 'Number Good pred : ', num_good_pred
         print 'Number Bad pred  : ', num_bad_pred
-        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred)*100,2), '%'
+        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.01)*100,2), '%'
         print 'Mean bet : ', df_single_filter.min_bet.mean()
         print 'cave     : ', int(cave),' €'
         print 'gain pur : ', int(result),' €'
@@ -409,88 +436,9 @@ for day_shift in list_day_shift:
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
 df_dict_result.sort_index(inplace=True)
-#df_dict_result.plot(ylim=(-75,75))
 df_dict_result.plot()
         
  
-    
-    
-    
-    
-    
-"""
-    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
-    print date_min.strftime('%d, %B %Y'), ' / ', date_max.strftime('%d, %B %Y')
-
-    list_sport = df_merge_single.sport.unique().tolist()
-    dict_result_sport = {}
-    for sport in list_sport:
-        result     = 0
-        cave       = 0.1
-        df_         = df_merge_single[df_merge_single.sport == sport]
-        
-        df_train    = df_[(df_.match_date < date_min)]
-        df_test     = df_[(df_.match_date >= date_min) & (df_.match_date <= date_max)]
-        
-        dict_temp = optimisation_5(df_train, mod_value)
-        dict_parameter_sport_single.update(dict_temp)
-
-#    df_single_filter = optimisation_5_apply(df_test, dict_parameter_sport_single)
-        
-        ###
-        if len(df_train) > 900:
-            list_mod_ok = optimisation_4(df_train, mod_value)
-            print list_mod_ok
-            
-            df_result_temp = pd.DataFrame()
-            df_result_temp = optimisation_4_apply(df_test, list_mod_ok, mod_value)
-            ee
-            ###
-            
-            for item in range(len(df_result_temp)):
-                cave = cave + mise
-                if df_result_temp.good_pred.iloc[item] == 1:
-                    result = result+(df_result_temp.min_bet.iloc[item]+0.0-1)*mise
-                    dict_result_sport.update({sport:(df_result_temp.min_bet.iloc[item]+0.0-1)*mise})
-                else:
-                    result = result - mise
-            
-            if len(df_result_temp) != 0:
-                print('******** RESULT SIMULATION **********')
-                print 'SPORT : ', sport, ' : ', len(df_test), len(df_train)
-                print 'Number Good pred : ', len(df_result_temp)
-                print 'Number Bad pred  : ', len(df_result_temp[df_result_temp.good_pred == 0])
-                print '% : ', round(df_result_temp.good_pred.sum()/float(len(df_result_temp))*100,2), '%'
-                print 'Mean bet : ', df_result_temp.min_bet.mean()
-                print 'cave     : ', int(cave),' €'
-                print 'gain pur : ', int(result),' €'
-                print 'ROI cave : ', round(result/float(cave)*100,2), '%'
-                print 'ROI mise : ',round(result/mise,2)*100,"%"
-                print('*************************************')
-        total_result = total_result + result
-        total_cave   = total_cave + cave
-        
-
-    print total_result
-    print total_cave
-    print 'ROI cave : ', round(total_result/float(total_cave)*100,2), '%'
-    print ''
-    dict_bankroll.update({datetime.now()-timedelta(hours=24*day_shift):{'total':total_result}})
-#    dict_bankroll.update({datetime.now()-timedelta(hours=24*day_shift):dict_result_sport})
-        
-        
-        
-    
-
-df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
-df_dict_result.sort_index(inplace=True)
-df_dict_result.plot(ylim=(-75,75))
-
-"""   
-        
-        
-    
     
     
     
