@@ -374,9 +374,9 @@ def optimisation_6(df_train, mod_value):
                     print sport, (mod-1)*mod_value, mod*mod_value, int(result), int(result_with_draw)
                     
                     if result_with_draw > result:
-                        list_mod_ok.append([round((mod-1)*mod_value+mod_value,1),round(mod*mod_value+mod_value,1), len(df_train_mod), mod, 'X', int(result_with_draw)])
+                        list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'X', int(result_with_draw)])
                     else:
-                        list_mod_ok.append([round((mod-1)*mod_value+mod_value,1), round(mod*mod_value+mod_value,1), len(df_train_mod), mod, 'S', int(result)])
+                        list_mod_ok.append([round((mod-1)*mod_value+mod_value,2), round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'S', int(result)])
             
                     dict_temp.update({sport:list_mod_ok})
    
