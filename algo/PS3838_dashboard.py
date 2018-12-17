@@ -18,6 +18,7 @@ import pandas             as pd
 
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
+from tabulate                                                                  import tabulate
 
 from PS3838_scrap_function                                                     import ps3838_scrap_parlay, ps3838_scrap_single, ps3838_scrap_result
 from PS3838_support_function                                                   import encode_decode, optimisation, optimisation_2, optimisation_3, optimisation_apply, match_filter_prediction
@@ -72,18 +73,22 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         df_betting_single_done.prediction[df_betting_single_done.team_to_bet == df_betting_single_done.team_home] = 1
         
         df_merge_single_bet = pd.merge(df_betting_single_done, df_result_single, how='inner', on=['match_date','sport','team_home'])
-        df_merge_single_bet = df_merge_single_bet[['match_date','sport','ligue','bet_diff','min_bet','winner','prediction','team_home','bet_X']]
+        list_already_result = df_merge_single_bet.team_to_bet_id.unique().tolist()
+        df_merge_single_bet = df_merge_single_bet[['match_date','sport','ligue','bet_diff','min_bet','bet_X','mode_bet','prediction','winner','team_home']]
         df_merge_single_bet['good_pred']                          = 0
-        df_merge_single_bet.good_pred[df_merge_single_bet.prediction == df_merge_single_bet.winner] = 1
+        df_merge_single_bet.good_pred[(df_merge_single_bet.prediction == df_merge_single_bet.winner) | ((df_merge_single_bet.mode_bet == 'X') & (df_merge_single_bet.winner == 0))] = 1
         df_merge_single_bet['bad_pred']                           = 0
-        df_merge_single_bet.bad_pred[df_merge_single_bet.prediction != df_merge_single_bet.winner]  = 1
+        df_merge_single_bet.bad_pred[df_merge_single_bet.good_pred == 0]  = 1
         df_merge_single_bet.match_date                = df_merge_single_bet.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+        df_merge_single_bet.sort_values('match_date', ascending=False, inplace=True)
         
-        
-        
-        
-        
-        df_merge_single_bet = df_merge_single_bet[df_merge_single_bet.sport == 'soccer']
+        try:
+            df_single_ongoing   = df_betting_single_done[~(df_betting_single_done.team_to_bet_id.isin(list_already_result))]
+            df_single_ongoing   = df_single_ongoing[['match_date','sport','ligue','bet_diff','min_bet','bet_X','mode_bet','prediction','team_to_bet']]
+            df_single_ongoing.sort_values('match_date', ascending=False, inplace=True)
+        except:
+            df_single_ongoing   = pd.DataFrame()
+#        df_merge_single_bet = df_merge_single_bet[df_merge_single_bet.sport == 'soccer']
         
         
         
@@ -91,62 +96,59 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         # =============================================================================
         #  1 bet
         # =============================================================================    
-        print('1 BY 1')
-        result  = 0
-        cave    = 0
-        mise    = 5
-        draw_activated              = 1
-        
-        
+        result          = 0
+        cave            = 0
+        mise            = 5        
         num_good_pred   = 0
         num_bad_pred    = 0
-            
-        for item in range(len(df_merge_single_bet)):
-            if (df_merge_single_bet.min_bet.iloc[item] < 2.1) and (draw_activated == 1):
-                pass
-            else:
-                if draw_activated == 1:
-                    cave = cave + mise*2
-                else:
-                    cave = cave + mise
-            
-                if draw_activated == 1:
-                    result = result - mise*2
-                else:
-                    result = result - mise
-                    
-                if df_merge_single_bet.good_pred.iloc[item] == 1:
-                    result = result+(df_merge_single_bet.min_bet.iloc[item])*mise
-                if draw_activated == 1 and df_merge_single_bet.winner.iloc[item] == 0:
-                    result = result+(df_merge_single_bet.bet_X.iloc[item])*mise
-                    df_merge_single_bet['good_pred'].iloc[item]  = 1
-                    df_merge_single_bet['bad_pred'].iloc[item]   = 0
-                if (df_merge_single_bet.good_pred.iloc[item] == 1) or (draw_activated == 1 and df_merge_single_bet.winner.iloc[item] == 0):
-                    num_good_pred = num_good_pred + 1
-                else:
-                    num_bad_pred = num_bad_pred + 1
-                        
         
+        for item in range(len(df_merge_single_bet)):
+            if (df_merge_single_bet.min_bet.iloc[item] > 1.):
+                if df_merge_single_bet.mode_bet.iloc[item] == 'X':
+                    cave = cave + mise*2
+                    result = result - mise*2
+                    if df_merge_single_bet.good_pred.iloc[item] == 1:
+                        result = result + df_merge_single_bet.min_bet.iloc[item]*mise
+                        num_good_pred = num_good_pred + 1
+                    if df_merge_single_bet.winner.iloc[item] == 0:
+                        result = result + df_merge_single_bet.bet_X.iloc[item]*mise
+                        num_good_pred = num_good_pred + 1
+                    if df_merge_single_bet.good_pred.iloc[item] == 0 and df_merge_single_bet.winner.iloc[item] != 0:
+                        num_bad_pred = num_bad_pred + 1
+        
+        
+                if df_merge_single_bet.mode_bet.iloc[item] == 'S':
+                    cave = cave + mise
+                    result = result - mise
+                    if df_merge_single_bet.good_pred.iloc[item] == 1:
+                        result = result + df_merge_single_bet.min_bet.iloc[item]*mise
+                        num_good_pred = num_good_pred + 1
+                    else:
+                        num_bad_pred = num_bad_pred + 1
+                        
+                        
         orig_stdout = sys.stdout
         f = open('../dataset/local/dashbord.txt', 'w')
         sys.stdout = f
-        print('******** RESULT SIMULATION **********')
+        print('********       RESULTS     **********')
         print 'HEURE              : ', str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S'))
-        print 'Number bet engaged : ', len(df_betting_single_done)
-        print 'Cave engaged       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise*2
-        print 'Bet engaged        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
-        print 'Number Good pred   : ', num_good_pred
-        print 'Number Bad pred    : ', num_bad_pred
-        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.001)*100,2), '%'
-        print ''
-        print 'cave     : ', int(cave),u' €'.encode('utf-8')
-        print 'gain pur : ', round(result,2),' €'
-        print 'ROI cave : ', round(result/float(cave)*100,2), '%'
-        print round(result/mise,2)*100,"%"
-        print ''
+        print 'Bet OnGoing        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
+        print 'Cave OnGoing       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise*2
+        print(tabulate(df_single_ongoing, headers='keys', tablefmt='psql'))
+        print('*************************************')
         print(json.dumps(dict_parameter_sport, indent=4, sort_keys=True))
         print('*************************************')
-        print ''
+        print 'Bet Done           : ', len(df_merge_single_bet)
+        print 'TOTAL cave         : ', int(cave),'euros'
+        print 'Number Good pred   : ', num_good_pred
+        print 'Number Bad pred    : ', num_bad_pred
+        print '% good prediction  : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.001)*100,2), '%'
+        print 'TOTAL gain pur     : ', round(result,2),'euros'
+        print 'ROI cave           : ', round(result/float(cave)*100,2), '%'
+        print 'ROI mise           : ', round(result/mise,2)*100, "%"
+        print(tabulate(df_merge_single_bet, headers='keys', tablefmt='psql'))
+        print('*************************************')
+
         
         f.close()
         sys.stdout = orig_stdout
