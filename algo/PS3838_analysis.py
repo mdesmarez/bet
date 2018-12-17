@@ -64,6 +64,12 @@ df_parlay = pd.DataFrame.from_csv('../dataset/local/df_parlay.xls', encoding='ut
 df_result = pd.DataFrame.from_csv('../dataset/local/df_result.xls', encoding='utf-8')
 df_real_betting_single = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
 
+
+df_result               = df_result_server.copy()
+df_single               = df_single_server.copy()
+df_result               = df_result_server.copy()
+df_real_betting_single  = df_real_betting_single_serveur.copy()
+
 """
 # =============================================================================
 # 
@@ -320,16 +326,15 @@ df_parlay_filter[df_parlay_filter.good_pred == 1].min_bet.mean()
 from PS3838_support_function  import optimisation_6, optimisation_6_apply, optimisation_5, optimisation_5_apply
 
 mise                        = 5
-draw_activated              = 1
 
-mod_value                   = 0.1
+mod_value                   = 0.05
 day_train                   = 1
 day_shift                   = 0
 
 total_result                = 0
 total_cave                  = 0
 
-list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+list_day_shift              = list(np.linspace(0,12,13))
 #list_day_shift              = [0, 1, 2, 3]#, 4, 5, 6, 7, 8, 9, 10]
 
 list_day_shift.sort(reverse=True)
@@ -343,7 +348,7 @@ for day_shift in list_day_shift:
     date_min = datetime.now()-timedelta(hours=24*day_shift) - timedelta(hours=24*day_train)
     date_max = datetime.now()-timedelta(hours=24*day_shift)
     
-    hour_test = 01
+    hour_test = 23
     date_min = date_min.replace(hour=hour_test, minute=00, second=00)
     date_max = date_max.replace(hour=hour_test, minute=00, second=00)
     
@@ -391,32 +396,6 @@ for day_shift in list_day_shift:
                 else:
                     num_bad_pred = num_bad_pred + 1
 
-        
-        """
-        if (df_single_filter.min_bet.iloc[item] < 1.1) and (draw_activated == 1):
-            print df_single_filter.min_bet.iloc[item]
-        else:
-            
-            if draw_activated == 1:
-                cave = cave + mise*2
-            else:
-                cave = cave + mise
-        
-            if draw_activated == 1:
-                result = result - mise*2
-            else:
-                result = result - mise
-                
-            if df_single_filter.good_pred.iloc[item] == 1:
-                result = result+(df_single_filter.min_bet.iloc[item])*mise
-            if draw_activated == 1 and df_single_filter.winner.iloc[item] == 0:
-                result = result+(df_single_filter.bet_X.iloc[item])*mise
-    
-            if (df_single_filter.good_pred.iloc[item] == 1) or (draw_activated == 1 and df_single_filter.winner.iloc[item] == 0):
-                num_good_pred = num_good_pred + 1
-            else:
-                num_bad_pred = num_bad_pred + 1
-        """        
     
     if len(df_single_filter) != 0:
         print('******** RESULT SIMULATION **********')

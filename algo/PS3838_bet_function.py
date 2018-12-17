@@ -371,7 +371,7 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     df_single_filter.reset_index(drop=False, inplace = True)
     df_single_filter.sort_values('match_date', ascending=True, inplace=True)
     
-    number_bet  = 10
+    number_bet  = 30
     df_single_filter_bulk = df_single_filter.copy()
     df_single_filter = df_single_filter[~(df_single_filter.team_to_bet_id.isin(list_already_bet_single))]
     df_betting_single = df_single_filter[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','bet_X','team_to_bet_id','team_home','team_X_id','mode_bet']]

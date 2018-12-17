@@ -17,10 +17,12 @@ import datetime
 import re
 import ast
 
+
 import matplotlib.pyplot  as plt
 import pandas             as pd
 import numpy              as np
 
+from sklearn.utils import shuffle
 from bs4                  import BeautifulSoup
 from glob                                                                      import glob
 from datetime                                                                  import datetime
@@ -327,7 +329,17 @@ def optimisation_6(df_train, mod_value):
         df_train_sport = df_train[df_train.sport == sport]
 #        if sport == 'soccer': ee
 
-        if len(df_train_sport) > 800:
+        limit_train = 800
+        if len(df_train_sport) > limit_train:
+            
+            ### SHUFFLE
+#            df_train_sport = shuffle(df_train_sport)
+            
+            ###ORDER
+#            df_train_sport.sort_values('match_date',ascending=True,inplace=True)
+            
+#            df_train_sport        = df_train_sport[-limit_train:]
+            
             df_train_sport.sort_values('min_bet', inplace=True)
             df_train_sport['mod'] = df_train_sport.min_bet/mod_value
             df_train_sport['mod'] = df_train_sport['mod'].apply(lambda x: int(x))
@@ -354,11 +366,12 @@ def optimisation_6(df_train, mod_value):
                             result_with_draw = result_with_draw + bet_X
                     result_with_draw = result_with_draw - 2
             
-#                print (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, int(result), int(result_with_draw)
+#                print sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result), int(result_with_draw)
                 
                 limit_cap_min = 3
                 if len(df_train_mod)>10 and (result > limit_cap_min or result_with_draw > limit_cap_min) and (result > 0 and result_with_draw > 0):
-                    print (mod-1)*mod_value, mod*mod_value, int(result), int(result_with_draw)
+#                if len(df_train_mod)>10 and (result > limit_cap_min and result_with_draw > limit_cap_min):
+                    print sport, (mod-1)*mod_value, mod*mod_value, int(result), int(result_with_draw)
                     
                     if result_with_draw > result:
                         list_mod_ok.append([round((mod-1)*mod_value+mod_value,1),round(mod*mod_value+mod_value,1), len(df_train_mod), mod, 'X', int(result_with_draw)])

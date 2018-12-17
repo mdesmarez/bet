@@ -71,7 +71,7 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 
 
 dict_parameter_sport = ps3838_bet_single(df_single, df_merge_single, GMT_to_add)
-dashboard(dict_parameter_sport)
+dashboard(dict_parameter_sport, GMT_to_add)
 
 """
 # =============================================================================

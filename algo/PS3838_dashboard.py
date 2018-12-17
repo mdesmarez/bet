@@ -24,7 +24,7 @@ from PS3838_support_function                                                   i
 from PS3838_bet_function                                                       import ps3838_bet_simulator, ps3838_bet_parlay
 
 
-def dashboard(dict_parameter_sport):
+def dashboard(dict_parameter_sport, GMT_to_add):
     # =============================================================================
     # 
     # =============================================================================
@@ -130,15 +130,14 @@ def dashboard(dict_parameter_sport):
         orig_stdout = sys.stdout
         f = open('../dataset/local/dashbord.txt', 'w')
         sys.stdout = f
-        
         print('******** RESULT SIMULATION **********')
-        print 'HEURE              : ', str(datetime.now().strftime('%d %B %Y, %H:%M:%S'))
+        print 'HEURE              : ', str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S'))
         print 'Number bet engaged : ', len(df_betting_single_done)
         print 'Cave engaged       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise*2
         print 'Bet engaged        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
         print 'Number Good pred   : ', num_good_pred
         print 'Number Bad pred    : ', num_bad_pred
-        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred)*100,2), '%'
+        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.001)*100,2), '%'
         print ''
         print 'cave     : ', int(cave),u' €'.encode('utf-8')
         print 'gain pur : ', round(result,2),' €'
