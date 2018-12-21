@@ -107,12 +107,15 @@ def dashboard(dict_parameter_sport, GMT_to_add):
                 if df_merge_single_bet.mode_bet.iloc[item] == 'X':
                     cave = cave + mise*2
                     result = result - mise*2
-                    if df_merge_single_bet.good_pred.iloc[item] == 1:
+                    
+                    if df_merge_single_bet.good_pred.iloc[item] == 1 and df_merge_single_bet.winner.iloc[item] != 0:
                         result = result + df_merge_single_bet.min_bet.iloc[item]*mise
                         num_good_pred = num_good_pred + 1
+                    
                     if df_merge_single_bet.winner.iloc[item] == 0:
                         result = result + df_merge_single_bet.bet_X.iloc[item]*mise
                         num_good_pred = num_good_pred + 1
+                        
                     if df_merge_single_bet.good_pred.iloc[item] == 0 and df_merge_single_bet.winner.iloc[item] != 0:
                         num_bad_pred = num_bad_pred + 1
         

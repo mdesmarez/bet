@@ -70,6 +70,17 @@ df_single               = df_single_server.copy()
 df_result               = df_result_server.copy()
 df_real_betting_single  = df_real_betting_single_serveur.copy()
 
+
+df_result.to_csv('../dataset/local/df_result.xls', encoding='utf-8')
+df_parlay.to_csv('../dataset/local/df_parlay.xls', encoding='utf-8')
+df_single.to_csv('../dataset/local/df_single.xls', encoding='utf-8')
+df_real_betting_single.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+
+
+from PS3838_dashboard                                                          import dashboard
+dict_parameter_sport, GMT_to_add = {}, 0
+dashboard(dict_parameter_sport, GMT_to_add)
+
 """
 # =============================================================================
 # 
@@ -103,7 +114,7 @@ df_merge_single['bad_pred']                           = 0
 df_merge_single.bad_pred[df_merge_single.prediction != df_merge_single.winner]  = 1
 df_merge_single.match_date                = df_merge_single.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
-
+ee
 # =============================================================================
 # Prepare bet SINGLE
 # =============================================================================
@@ -323,23 +334,30 @@ df_parlay_filter[df_parlay_filter.good_pred == 1].min_bet.mean()
 
 #%%
 
-from PS3838_support_function  import optimisation_6, optimisation_6_apply, optimisation_5, optimisation_5_apply
+from PS3838_support_function  import optimisation_7, optimisation_7_apply, optimisation_6, optimisation_6_apply, optimisation_5, optimisation_5_apply
 
 mise                        = 5
+mod_value                   = 0.1
+limit_bet                   = 1.
+limit_DC                    = 0.065
+limit_perf_min              = 0.
+mode                        = 'S'
 
-mod_value                   = 0.05
 day_train                   = 1
 day_shift                   = 0
 
 total_result                = 0
 total_cave                  = 0
 
-list_day_shift              = list(np.linspace(0,12,13))
+list_day_shift              = list(np.linspace(0,18,19))
 #list_day_shift              = [0, 1, 2, 3]#, 4, 5, 6, 7, 8, 9, 10]
 
 list_day_shift.sort(reverse=True)
 dict_bankroll               = {}
 dict_parameter_sport_single = {}
+
+#df_merge_single = df_merge_single[df_merge_single.bet_1 < df_merge_single.bet_2]
+#df_merge_single = df_merge_single[df_merge_single.bet_diff > 1]
 
 for day_shift in list_day_shift:
     result     = 0
@@ -362,8 +380,8 @@ for day_shift in list_day_shift:
     print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
     print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')
     
-    dict_parameter_sport = optimisation_6(df_train, mod_value)
-    df_single_filter = optimisation_6_apply(df_test, dict_parameter_sport, mod_value)
+    dict_parameter_sport = optimisation_7(df_train, mod_value, limit_bet, limit_DC, mode, limit_perf_min)
+    df_single_filter = optimisation_7_apply(df_test, dict_parameter_sport, mod_value)
 
 #    dict_parameter_sport         = optimisation_6(df_merge_single, mod_value)
 
@@ -373,16 +391,68 @@ for day_shift in list_day_shift:
     
     
     for item in range(len(df_single_filter)):
-        if (df_single_filter.min_bet.iloc[item] > 1.):
+        if (df_single_filter.min_bet.iloc[item] > limit_bet):
+            
+            min_bet = df_single_filter.min_bet.iloc[item]+0.0000001
+            bet_X   = df_single_filter.bet_X.iloc[item]+0.0000001
+            bet_DC  = 1/((1/min_bet)+(1/bet_X))
+            bet_DNB = (1-(1/bet_X))*min_bet
+            bet_WNB = (1-(1/min_bet))*bet_X
+                    
+            if df_single_filter.mode_bet.iloc[item] == 'DC':
+                cave = cave + mise
+                result = result - mise
+                
+                if df_single_filter.good_pred.iloc[item] == 1 or df_single_filter.winner.iloc[item] == 0:
+                    result = result + bet_DC*mise
+                    num_good_pred = num_good_pred + 1
+                else:
+                    num_bad_pred = num_bad_pred + 1
+    
+
+            if df_single_filter.mode_bet.iloc[item] == 'DNB':
+                cave = cave + mise
+                result = result - mise
+                
+                if df_single_filter.good_pred.iloc[item] == 1:
+                    result = result + bet_DNB*mise
+                    
+                if df_single_filter.winner.iloc[item] == 0:
+                    result = result + mise
+                    num_good_pred = num_good_pred + 1
+                
+                if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                    num_bad_pred = num_bad_pred + 1
+
+                    
+            if df_single_filter.mode_bet.iloc[item] == 'WNB':
+                cave = cave + mise
+                result = result - mise
+                
+                if df_single_filter.good_pred.iloc[item] == 1:
+                    result = result + mise
+                    
+                if df_single_filter.winner.iloc[item] == 0:
+                    result = result + bet_WNB*mise
+                    num_good_pred = num_good_pred + 1
+                
+                if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                    num_bad_pred = num_bad_pred + 1
+                    
+                                        
+            
             if df_single_filter.mode_bet.iloc[item] == 'X':
                 cave = cave + mise*2
                 result = result - mise*2
-                if df_single_filter.good_pred.iloc[item] == 1:
+                
+                if df_single_filter.good_pred.iloc[item] == 1 and df_single_filter.winner.iloc[item] != 0:
                     result = result + df_single_filter.min_bet.iloc[item]*mise
                     num_good_pred = num_good_pred + 1
+                
                 if df_single_filter.winner.iloc[item] == 0:
                     result = result + df_single_filter.bet_X.iloc[item]*mise
                     num_good_pred = num_good_pred + 1
+                
                 if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
                     num_bad_pred = num_bad_pred + 1
     
@@ -399,6 +469,7 @@ for day_shift in list_day_shift:
     
     if len(df_single_filter) != 0:
         print('******** RESULT SIMULATION **********')
+        print dict_parameter_sport
         print 'Number Good pred : ', num_good_pred
         print 'Number Bad pred  : ', num_bad_pred
         print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.01)*100,2), '%'
@@ -423,11 +494,8 @@ for day_shift in list_day_shift:
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
 df_dict_result.sort_index(inplace=True)
-df_dict_result.plot()
+title = str(mod_value) + ' / ' + str(limit_bet) + ' / ' + str(limit_DC) + ' / ' + mode
+df_dict_result.plot(title=title)
         
  
     
-    
-    
-    
-
