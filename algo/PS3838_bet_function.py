@@ -17,7 +17,8 @@ import datetime
 import re
 import ast
 import warnings
-    
+import json
+
 import matplotlib.pyplot  as plt
 import pandas             as pd
 import numpy              as np
@@ -27,9 +28,129 @@ from glob                                                                      i
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
 
-from PS3838_support_function                                                   import encode_decode, optimisation, optimisation_2, optimisation_3, optimisation_apply, match_filter_prediction, optimisation_6, optimisation_6_apply
+from PS3838_support_function                                                   import encode_decode, match_filter_prediction, optimisation_7, optimisation_7_apply
 
 
+# =============================================================================
+# PLACE REAL ORDER
+# =============================================================================
+def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
+    warnings.filterwarnings('ignore')
+
+    df_merge_single['sport'] = df_merge_single['sport'].apply(lambda x : x.lower()) 
+    # =============================================================================
+    # Ajust bet parameter SINGLE
+    # =============================================================================
+    df_temp = 0
+    list_sport = df_merge_single.sport.unique().tolist()
+    dict_parameter_sport_single = {}
+        
+    ###
+    with open('../model/local/dict_parameter_sport.json') as json_file:  
+        dict_parameter_sport = json.load(json_file)
+    df_single_filter = optimisation_7_apply(df_single, dict_parameter_sport)
+
+    
+    if len(df_single_filter) == 0:
+        return
+    
+    df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+
+    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
+    df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
+        
+    # =============================================================================
+    # Print opportunity SINGLE
+    # =============================================================================
+    print '*****************************'
+    print str(datetime.now()+timedelta(hours=GMT_to_add))
+    df_single_filter.sort_values('bet_diff', ascending=False, inplace=True)
+    print 'df_single_filter : ', len(df_single_filter)
+    print '*****************************'
+
+    # =============================================================================
+    # Prepare bet SINGLE
+    # =============================================================================
+    try:
+        df_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+        list_already_bet_single = df_betting_single_done.team_to_bet_id.unique().tolist()
+    except:
+        list_already_bet_single = []
+    
+    df_single_filter['team_to_bet']     = df_single_filter['team_home']
+    df_single_filter['team_to_bet_id']  = df_single_filter['team_home_id']
+    df_single_filter['team_to_bet'][df_single_filter.bet_1 > df_single_filter.bet_2] = df_single_filter['team_away'][df_single_filter.bet_1 > df_single_filter.bet_2]
+    df_single_filter['team_to_bet_id'][df_single_filter.bet_1 > df_single_filter.bet_2] = df_single_filter['team_away_id'][df_single_filter.bet_1 > df_single_filter.bet_2]
+    df_single_filter.reset_index(drop=False, inplace = True)
+    df_single_filter.sort_values('match_date', ascending=True, inplace=True)
+    
+    number_bet  = 30
+    df_single_filter_bulk = df_single_filter.copy()
+    df_single_filter = df_single_filter[~(df_single_filter.team_to_bet_id.isin(list_already_bet_single))]
+    df_betting_single = df_single_filter[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','bet_X','team_to_bet_id','team_home','team_X_id','mode_bet']]
+    df_betting_single = df_betting_single.iloc[0:number_bet]
+    df_betting_single.team_X_id.fillna('0', inplace=True)
+
+    if len(df_betting_single) != 0:
+        print '*****************************'
+        print 'df_betting single : ', len(df_betting_single)
+        for i in range(len(df_betting_single)):
+            if i == 0:
+                bet_single = df_betting_single.min_bet.iloc[i]
+            if i > 0:
+                bet_single = bet_single*df_betting_single.min_bet.iloc[i]
+        print 'bet_single : ', bet_single
+        print str(datetime.now()+timedelta(hours=GMT_to_add))
+        print '*****************************'
+    
+        # =============================================================================
+        # EXECUTE BET
+        # =============================================================================
+        """
+        df_betting_single_X = df_betting_single[df_betting_single.mode_bet == 'X']
+        df_betting_single_S = df_betting_single[df_betting_single.mode_bet == 'S']
+
+        team_X_id       = str(df_betting_single.team_X_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
+        team_to_bet_id  = str(df_betting_single.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
+        sport_to_bet    = str(df_betting_single.sport.tolist())[1:-1].replace('u','').replace("'","")
+
+        if len(df_betting_single_S) != 0:
+            print 'bet_S'
+            print df_betting_single_S
+#            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
+        
+        if len(df_betting_single_X) != 0:
+            print 'bet_X'
+            print df_betting_single_X
+            team_to_bet_id  = team_to_bet_id + ',' + team_X_id
+            sport_to_bet    = sport_to_bet + ', ' + sport_to_bet    
+#            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
+        """
+        
+        try:
+            df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+        except:
+            df_real_betting_single_done = pd.DataFrame()
+        df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single))
+        df_real_betting_single_done.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
+    
+    else:
+        if len(df_single_filter_bulk) != 0:
+            print '*****************************'
+            print 'All Single bet already placed'
+            print str(datetime.now()+timedelta(hours=GMT_to_add))
+            print '*****************************'
+        else:
+            print '*****************************'
+            print 'No single bet single'
+            print str(datetime.now()+timedelta(hours=GMT_to_add))
+            print '*****************************'
+    
+    return dict_parameter_sport
+
+
+
+"""
 # =============================================================================
 # 
 # =============================================================================
@@ -308,11 +429,12 @@ def ps3838_bet_simulator(df_single_filter, df_parlay_filter, df_result):
 
 
     return df_bet, df_bet_result
-
+"""
 
 # =============================================================================
-# PLACE REAL ORDER
+# PLA
 # =============================================================================
+"""
 def ps3838_bet_parlay(df_betting_parlay):
     team_to_bet_id = str(df_betting_parlay.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
     sport_to_bet   = str(df_betting_parlay.sport.tolist())[1:-1].replace('u','').replace("'","")
@@ -320,115 +442,4 @@ def ps3838_bet_parlay(df_betting_parlay):
     date_bet = datetime.now()+timedelta(hours=GMT_to_add)
     date_bet_string = str(date_bet.hour).zfill(2) + ':' + str(date_bet.minute).zfill(2) + '_' + str(date_bet.day) + '_' + str(date_bet.month) + '_' + str(date_bet.year)
     df_betting_parlay.to_csv('../dataset/local/Real_df_betting_parlay_' + date_bet_string + '.xls', encoding='utf-8')
-
-
-def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
-    warnings.filterwarnings('ignore')
-
-    df_merge_single['sport'] = df_merge_single['sport'].apply(lambda x : x.lower()) 
-    # =============================================================================
-    # Ajust bet parameter SINGLE
-    # =============================================================================
-    df_temp = 0
-    list_sport = df_merge_single.sport.unique().tolist()
-    dict_parameter_sport_single = {}
-        
-    ###
-    mod_value                    = 0.1
-    dict_parameter_sport         = optimisation_6(df_merge_single, mod_value)
-    df_single_filter             = optimisation_6_apply(df_single, dict_parameter_sport, mod_value)
-    
-    if len(df_single_filter) == 0:
-        return
-    
-    df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
-
-    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
-    df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
-        
-    # =============================================================================
-    # Print opportunity SINGLE
-    # =============================================================================
-    print '*****************************'
-    print str(datetime.now()+timedelta(hours=GMT_to_add))
-    df_single_filter.sort_values('bet_diff', ascending=False, inplace=True)
-    print 'df_single_filter : ', len(df_single_filter)
-    print '*****************************'
-
-    # =============================================================================
-    # Prepare bet SINGLE
-    # =============================================================================
-    try:
-        df_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
-        list_already_bet_single = df_betting_single_done.team_to_bet_id.unique().tolist()
-    except:
-        list_already_bet_single = []
-    
-    df_single_filter['team_to_bet']     = df_single_filter['team_home']
-    df_single_filter['team_to_bet_id']  = df_single_filter['team_home_id']
-    df_single_filter['team_to_bet'][df_single_filter.bet_1 > df_single_filter.bet_2] = df_single_filter['team_away'][df_single_filter.bet_1 > df_single_filter.bet_2]
-    df_single_filter['team_to_bet_id'][df_single_filter.bet_1 > df_single_filter.bet_2] = df_single_filter['team_away_id'][df_single_filter.bet_1 > df_single_filter.bet_2]
-    df_single_filter.reset_index(drop=False, inplace = True)
-    df_single_filter.sort_values('match_date', ascending=True, inplace=True)
-    
-    number_bet  = 30
-    df_single_filter_bulk = df_single_filter.copy()
-    df_single_filter = df_single_filter[~(df_single_filter.team_to_bet_id.isin(list_already_bet_single))]
-    df_betting_single = df_single_filter[['match_date','sport','ligue','index','team_to_bet','min_bet','bet_diff','bet_X','team_to_bet_id','team_home','team_X_id','mode_bet']]
-    df_betting_single = df_betting_single.iloc[0:number_bet]
-    df_betting_single.team_X_id.fillna('0', inplace=True)
-
-    if len(df_betting_single) != 0:
-        print '*****************************'
-        print 'df_betting single : ', len(df_betting_single)
-        for i in range(len(df_betting_single)):
-            if i == 0:
-                bet_single = df_betting_single.min_bet.iloc[i]
-            if i > 0:
-                bet_single = bet_single*df_betting_single.min_bet.iloc[i]
-        print 'bet_single : ', bet_single
-        print str(datetime.now()+timedelta(hours=GMT_to_add))
-        print '*****************************'
-    
-        # =============================================================================
-        # EXECUTE BET
-        # =============================================================================
-        df_betting_single_X = df_betting_single[df_betting_single.mode_bet == 'X']
-        df_betting_single_S = df_betting_single[df_betting_single.mode_bet == 'S']
-
-        team_X_id       = str(df_betting_single.team_X_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
-        team_to_bet_id  = str(df_betting_single.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
-        sport_to_bet    = str(df_betting_single.sport.tolist())[1:-1].replace('u','').replace("'","")
-
-        if len(df_betting_single_S) != 0:
-            print 'bet_S'
-            print df_betting_single_S
-            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
-        
-        if len(df_betting_single_X) != 0:
-            print 'bet_X'
-            print df_betting_single_X
-            team_to_bet_id  = team_to_bet_id + ',' + team_X_id
-            sport_to_bet    = sport_to_bet + ', ' + sport_to_bet    
-            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
-                
-        try:
-            df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
-        except:
-            df_real_betting_single_done = pd.DataFrame()
-        df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single))
-        df_real_betting_single_done.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
-    
-    else:
-        if len(df_single_filter_bulk) != 0:
-            print '*****************************'
-            print 'All Single bet already placed'
-            print str(datetime.now()+timedelta(hours=GMT_to_add))
-            print '*****************************'
-        else:
-            print '*****************************'
-            print 'No single bet single'
-            print str(datetime.now()+timedelta(hours=GMT_to_add))
-            print '*****************************'
-    
-    return dict_parameter_sport
+"""

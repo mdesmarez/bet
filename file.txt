@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "sixth-oxygen-223917",
+  "private_key_id": "89a806b687e6d34e10cf118f1563981d89408b45",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCNLLctdcT0c678\nbBsVzBjc2ykGMMb+NglrxKaixibb35xbo3B6KXkRGH9SBtWwdBrfaY/SzdqXQeE6\nLGSkaxjJATPCcN3jCHoD6llfBWMTdhz5cjMuogFCpvMOJr4il259xCdZ+0IYR4kS\nXu3b3DlK3e1GtQsHZX6LnXYHU+vyieritrusAQD7EXnqWvvNQOkqzenomizbVp+M\nkcDkyO2UsJRVBzL6cQIygBx4PItKqrthoYIOEzp9sIemSr1A+tnMBVfXQHvccXMF\nV5w8V4wguLn9bIZ/wOOSOxVEJ4SnxwEJ0f4w0rKe/ioFinFfGdAuZnGYAoeWWnPK\niCDwYSxRAgMBAAECggEAAJT8G6mzdPyFw/r1cPVlRC0lHKZBKRVznChJ4Dw9Nxp+\nDFn+od+fj6SltbgF09M5XyK8xIuJCKbtX5jaQLFDqg8hYFOoc9dPmsoxscoVuqP5\n15oTFZtLsl4k0gdH27WlxMqft5JpFyzdpvU8OXP4H9O4DDASimZui0h2uZiszX78\nJrLW+S36iwTt+wl/I4aG7z1NthTMZfW2gHzKvhZtJsMYtMUr2P0uUe541nMC2tqn\niiSEENFRlLYKEn/PoGSWbUuvYEYMZl9QxY5+Ka6Nv2DCyLDMUL1uDWuniuUJRsBF\nNAjqasVjxE7b1YFYXI7amtkmNaP0/s4rXbChhrmg3wKBgQDHR4W7ejQsE9XONmby\nGVUivD04bB4gC9TVEixZmhzcq5iH67iug7Mq+lqu9uMkzM7RUEzueqlgXekFCch+\nnQopisUIPvNJNdWN/YxXO/a9AJn394rHfT5L8FHWm0j+C2R8afoZ6tBpPVs1Rtjw\nrUMkcgRpciMSnrnRg2I4K8e21wKBgQC1W2W+UhAOO5eVn+sG/0DHIHtDC9+QRvPZ\nw96hrlJz6QRWcpUoPYt8JYzF3HVhkM0re+DvLGWGtdqqsDPLKQcgfmu8cieazMf6\nUFkJxWyQBPLbz6KRznpCzzK3RPwN1xbqClTbkYX2SD/NE30KBnD4I5WeiTWOdfiY\nTcivazlZFwKBgBCXE7sX4WAKBrK0NL3S/hN2OGKKHbftRDq42JhdDCoS3w/xv95H\neJMLZKFMTHyz0EP8u2rfK1qqdsvElLx1tnLe6qhVFUvy/2Rix1w70b7KXgcWxKb2\n9ki8KRQEuX7s0+DHsdqWgeNBCGbXDxh6VCykkVl19xWFwVJ/7Z1fh7DhAoGBAJbN\nyWzZEEDFjOb+c5D97/+lIto9pUlztpH+LcKEEkwQF2tLHHy5sKMrFkPxbioTHohq\nGkDHyiSaU5pbqrXlB+gdN7kbs5MldaTP6zoU0JFxjAD8R1K3PzMO2D1NP8rCcGts\n6+MovxxsN6Fv8ynC8W1lKaUKs14i+vSquZYksytBAoGBALW03ALsPLDyqdPBU/o2\nUDxN+1yISCV2uZa/tj+eVUnmf5IIRY+F5XcwPoYen+392PAe7oNDM1LnscGW13i3\nonn8cmLZ/lDVdK6yByTqyDzP2YhuP7QHZb4PgVd6ygqf/5GIan6x/v45RBlWyddb\nRqfrMnbVw/MUBqQTpyXQ7JbT\n-----END PRIVATE KEY-----\n",
+  "client_email": "bet-hiub@sixth-oxygen-223917.iam.gserviceaccount.com",
+  "client_id": "102646401024967638776",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/bet-hiub%40sixth-oxygen-223917.iam.gserviceaccount.com"
+}
