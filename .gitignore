@@ -7,7 +7,6 @@ __pycache__/
 
 # local folder
 dataset/local/**
-model/local/**
 algo/venv/**
 algo/*.zip
 node_modules

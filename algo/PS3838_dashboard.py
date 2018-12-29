@@ -260,7 +260,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
             print('********      ON GOING     **********')
             print 'Heure              : ', str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S'))
             print 'Bet OnGoing        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
-            print 'Cave OnGoing       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise*2
+            print 'Cave OnGoing       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise
             print(tabulate(df_single_ongoing, headers='keys', tablefmt='psql'))
             
             print('\n\n')
@@ -275,6 +275,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
             print 'INVEST TOTAL       : ', int(total_cave), 'euros'
             print 'NBR BET TOTAL      : ', total_nbr_bet
             print('\n')
+            print 'BANKROLL           : ', int(bankroll), 'euros'
             print 'ROI cave           : ', round(total_result/float(total_cave)*100,2), '%'
             print 'ROC cave           : ', round(total_result/float(bankroll)*100,2), '%'
             print 'MIN CAVE           : ', int(min_cave), 'euros ==>', int(round(min_cave/mise))

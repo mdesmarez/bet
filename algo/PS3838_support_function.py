@@ -446,7 +446,7 @@ def optimisation_7(df_train, dict_training_option):
         list_mod_ok             = [] 
         for mod in list_mod:
             df_train_mod = df_train_sport[df_train_sport['mod'] == int(mod)]
-            limit_train = 75
+            limit_train = 5
             if len(df_train_mod) > limit_train:
                 result              = 0
                 result_with_draw    = 0

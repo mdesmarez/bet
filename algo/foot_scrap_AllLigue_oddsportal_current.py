@@ -43,7 +43,7 @@ from glob                 import glob
 #df_NHL_scores.reset_index(drop=True, inplace=True)
 #df_NHL_scores.sort_values(['date_match'], inplace=True, ascending=True)
 
-process_scrap                   = 1
+process_scrap                   = 0
 process_scrap_next_match        = 0
 process_generate                = 1 
 
@@ -62,63 +62,63 @@ list_ligue = [
                 [u'handball', u'norway', u'nm-cup'],
                 
 
-                [u'handball', u'sweden', u'handbollsligan'],
-
-
-                [u'baseball', u'usa', u'handbollsligan'],
-
-
-
-
-                
-
-                [u'basketball', u'spain', u'acb'],
-                [u'basketball', u'italy', u'lega-a'],
-                [u'basketball', u'usa', u'nba'],
-                [u'basketball', u'germany', u'bbl'],
-                [u'basketball', u'russia', u'vtb-united-league'],                
-                [u'basketball', u'finland', u'korisliiga'],
-
-                
-                [u'volleyball', u'italy', u'serie-a1'],
-                [u'volleyball', u'brazil', u'superliga-women'],
-
-
-                
-        
-                [u'soccer', u'france', u'ligue-1'],
-                [u'soccer', u'france', u'ligue-2'],
-                
-                [u'soccer', u'belgium', u'jupiler-league'],
-                [u'soccer', u'belgium', u'proximus-league'],
-                
-                [u'soccer', u'portugal', u'primeira-liga'],
-                [u'soccer', u'portugal', u'segunda-liga'],
-
-                [u'soccer', u'germany', u'bundesliga'],
-                
-                [u'soccer', u'netherlands', u'eredivisie'],
-                
-                [u'soccer', u'spain', u'laliga'],
-                
-                [u'soccer', u'england', u'premier-league'],
-                [u'soccer', u'england', u'efl-cup'],
-                [u'soccer', u'cyprus', u'first-division'],
-                [u'soccer', u'bulgaria', u'parva-liga'],
-                [u'soccer', u'italy', u'serie-a'],
-                
-                [u'soccer', u'croatia', u'1-hnl'],
-                [u'soccer', u'argentina', u'superliga'],
-                [u'soccer', u'switzerland', u'super-league'],
-                [u'soccer', u'poland', u'ekstraklasa'],
-                
-                [u'soccer', u'algeria', u'ligue-1'],
-                [u'soccer', u'czech-republic', u'1-liga'],
-                [u'soccer', u'luxembourg', u'national-division'],
-                
-
-                [u'soccer', u'serbia', u'prva-liga'],
-                [u'soccer', u'scotland', u'premiership'],
+#                [u'handball', u'sweden', u'handbollsligan'],
+#
+#
+#                [u'baseball', u'usa', u'handbollsligan'],
+#
+#
+#
+#
+#                
+#
+#                [u'basketball', u'spain', u'acb'],
+#                [u'basketball', u'italy', u'lega-a'],
+#                [u'basketball', u'usa', u'nba'],
+#                [u'basketball', u'germany', u'bbl'],
+#                [u'basketball', u'russia', u'vtb-united-league'],                
+#                [u'basketball', u'finland', u'korisliiga'],
+#
+#                
+#                [u'volleyball', u'italy', u'serie-a1'],
+#                [u'volleyball', u'brazil', u'superliga-women'],
+#
+#
+#                
+#        
+#                [u'soccer', u'france', u'ligue-1'],
+#                [u'soccer', u'france', u'ligue-2'],
+#                
+#                [u'soccer', u'belgium', u'jupiler-league'],
+#                [u'soccer', u'belgium', u'proximus-league'],
+#                
+#                [u'soccer', u'portugal', u'primeira-liga'],
+#                [u'soccer', u'portugal', u'segunda-liga'],
+#
+#                [u'soccer', u'germany', u'bundesliga'],
+#                
+#                [u'soccer', u'netherlands', u'eredivisie'],
+#                
+#                [u'soccer', u'spain', u'laliga'],
+#                
+#                [u'soccer', u'england', u'premier-league'],
+#                [u'soccer', u'england', u'efl-cup'],
+#                [u'soccer', u'cyprus', u'first-division'],
+#                [u'soccer', u'bulgaria', u'parva-liga'],
+#                [u'soccer', u'italy', u'serie-a'],
+#                
+#                [u'soccer', u'croatia', u'1-hnl'],
+#                [u'soccer', u'argentina', u'superliga'],
+#                [u'soccer', u'switzerland', u'super-league'],
+#                [u'soccer', u'poland', u'ekstraklasa'],
+#                
+#                [u'soccer', u'algeria', u'ligue-1'],
+#                [u'soccer', u'czech-republic', u'1-liga'],
+#                [u'soccer', u'luxembourg', u'national-division'],
+#                
+#
+#                [u'soccer', u'serbia', u'prva-liga'],
+#                [u'soccer', u'scotland', u'premiership'],
 
                 
               ]
