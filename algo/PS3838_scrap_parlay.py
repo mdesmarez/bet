@@ -303,7 +303,7 @@ for single in list_single:
                                             'sport'      : sport,
                                             'ligue'      : ligue_name,
                                             }}) 
-    print sport
+#    print sport
 
                     
                 
@@ -437,7 +437,7 @@ for parlay in list_parlay:
                                             'sport_id'      : sport_id,
                                             'ligue'      : ligue_name,
                                             }}) 
-                print sport
+#                print sport
 
 
 
@@ -553,7 +553,7 @@ for parlay in list_parlay:
                                             'sport_id'      : sport_id,
                                             'ligue'      : ligue_name,
                                             }}) 
-                print sport
+#                print sport
 
 
 
