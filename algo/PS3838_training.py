@@ -81,7 +81,7 @@ df_train = df_soccer[df_soccer.match_date < datetime(2019, 8, 8, 0, 46, 43, 1000
 ### OPTIONS
 dict_training_option = {'soccer':{
                                 'mod_value':       0.1,
-                                'limit_bet':       2,
+                                'limit_bet':       2.0,
                                 'limit_DC':        0.025,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',
@@ -97,7 +97,7 @@ with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
     json.dump(dict_parameter, outfile)
 
 
-
+ee
 # =============================================================================
 # 
 # =============================================================================
@@ -140,7 +140,7 @@ df_train = df_handball[df_handball.match_date < datetime(2019, 8, 8, 0, 46, 43, 
 dict_training_option = {'handball':{
                                 'mod_value':       0.05,
                                 'limit_bet':       1.,
-                                'limit_DC':        0.04,
+                                'limit_DC':        0.01,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',
                                  }}

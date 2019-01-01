@@ -61,9 +61,9 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 # =============================================================================
 # 
 # =============================================================================
-initial_bankroll            = 1000
+initial_bankroll            = 500
 bankroll                    = initial_bankroll
-mise                        = 40
+mise                        = 20
 min_cave                    = 0
 max_cave                    = 0    
 day_train                   = 1
@@ -71,8 +71,8 @@ day_shift                   = 0
 total_result                = 0
 total_cave                  = 0
 total_nbr_bet               = 0
-list_day_shift              = list(np.linspace(0,30,31))
-#list_day_shift              = [2]#, 1, 2, 3, 4, 5, 6, 7]#, 8, 9, 10]
+list_day_shift              = list(np.linspace(0,38,39))
+#list_day_shift              = [1]#, 1, 2, 3, 4, 5]#, 6, 7]#, 8, 9, 10]
 #list_day_shift              = [10, 11, 12, 13]#, 4, 5, 6, 7]#, 8, 9, 10]
 df_loss                     = pd.DataFrame()
 df_win                      = pd.DataFrame()
@@ -87,7 +87,7 @@ df_parameter_sport          = pd.DataFrame()
 
 
 for day_shift in list_day_shift:
-#    mise       = bankroll*4/100
+    mise       = bankroll*4/100
     result     = 0
     cave       = 0.001
         
@@ -95,14 +95,14 @@ for day_shift in list_day_shift:
     date_max = datetime.now()-timedelta(hours=24*day_shift)
     
     hour_test = 23
-    date_min = date_min.replace(hour=hour_test, minute=00, second=00)
-    date_max = date_max.replace(hour=hour_test, minute=00, second=00)
+    date_min = date_min.replace(hour=hour_test, minute=59, second=00)
+    date_max = date_max.replace(hour=hour_test, minute=59, second=00)
     
     df_train    = df_merge_single_modif[(df_merge_single_modif.match_date < date_min)]
     df_test     = df_merge_single_modif[(df_merge_single_modif.match_date >= date_min) & (df_merge_single_modif.match_date <= date_max)]
 
     
-    print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
+    print '\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
     print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
     print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')    
     with open('../model/local/dict_parameter_sport.json') as json_file:  
@@ -255,11 +255,12 @@ for day_shift in list_day_shift:
         max_cave = total_result
         
 
+    print 'BANKROLL       : ', int(bankroll), '€'
     print 'GAIN TOTAL     : ', int(total_result), '€'
     print 'INVEST TOTAL   : ', int(total_cave)
     print 'NBR BET TOTAL  : ', total_nbr_bet
     print 'ROI cave       : ', round(total_result/float(total_cave)*100,2), '%'
-    print 'ROC cave       : ', round(total_result/float(200)*100,2), '%'
+    print 'ROC cave       : ', round(total_result/float(initial_bankroll)*100,2), '%'
     print 'MIN CAVE       : ', int(min_cave), '€', int(round(min_cave/mise))
     print 'MAX CAVE       : ', int(max_cave), '€', int(round(max_cave/mise))
     print ''
@@ -268,14 +269,16 @@ for day_shift in list_day_shift:
         list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
         for sport in list_sport_win_loss:
             print sport, ' : ', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%', '==>', round(dict_result_sport[sport]['result'],2), 'euros'
+            list_mod_win_loss = list(set(df_win[u'mod'].unique().tolist()+df_loss[u'mod'].unique().tolist()))
+            for mod in list_mod_win_loss:
+                print '       : ', round(100*len(df_win[df_win[u'mod'] == mod])/float(len(df_win[df_win[u'mod'] == mod])+len(df_loss[df_loss[u'mod'] == mod])),2),'%', '==>', mod
     except:
         pass
-    print ''
     print '******************************************'
 
 
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
-    dict_bankroll.update({date_text.strftime("%m %d - %a"):{'total':total_result}})
+    dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result}})
 
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
