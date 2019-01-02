@@ -213,64 +213,64 @@ def ps3838_scrap_parlay():
                     if str(li).find("selected") != -1:
                         sport_id            = z+1
     
-                try:
-                    for match in match_list:
-                        if match.find_all('td', { "class" : "o_A_draw "}) != []:
-                            match_odd       = match.find('td', { "class" : "o_A_draw"})
-                            team_home       = match_odd.find('span', { "class" : "o_left"}).text.strip()
-                            team_home_id    = match_odd.find('a')['id']
-                            bet_1           = match_odd.find('span', { "class" : "o_right "}).text.strip()
-                    
-                            bet_X           = 0
-                            team_X_id       = 0
-                            
-                            match_odd       = match.find('td', { "class" : "o_B_draw"})
-                            team_away       = match_odd.find('span', { "class" : "o_left"}).text.strip()
-                            team_away_id    = match_odd.find('a')['id']
-                            bet_2           = match_odd.find('span', { "class" : "o_right "}).text.strip()            
-                        else:
-                            match_odd       = match.find('td', { "class" : "o_A "})
-                            team_home       = match_odd.find('span', { "class" : "o_left"}).text.strip()
-                            team_home_id    = match_odd.find('a')['id']
-                            bet_1           = match_odd.find('span', { "class" : "o_right "}).text.strip()
+#                try:
+                for match in match_list:
+                    if match.find_all('td', { "class" : "o_A_draw "}) != []:
+                        match_odd       = match.find('td', { "class" : "o_A_draw"})
+                        team_home       = match_odd.find('span', { "class" : "o_left"}).text.strip()
+                        team_home_id    = match_odd.find('a')['id']
+                        bet_1           = match_odd.find('span', { "class" : "o_right "}).text.strip()
                 
-                            match_odd       = match.find('td', { "class" : "o_draw"})
-                            _               = match_odd.find('span', { "class" : "o_left"}).text.strip()
-                            bet_X           = match_odd.find('span', { "class" : "o_right "}).text.strip()
-                            team_X_id       = match_odd.find('a')['id']
+                        bet_X           = 0
+                        team_X_id       = 0
+                        
+                        match_odd       = match.find('td', { "class" : "o_B_draw"})
+                        team_away       = match_odd.find('span', { "class" : "o_left"}).text.strip()
+                        team_away_id    = match_odd.find('a')['id']
+                        bet_2           = match_odd.find('span', { "class" : "o_right "}).text.strip()            
+                    else:
+                        match_odd       = match.find('td', { "class" : "o_A "})
+                        team_home       = match_odd.find('span', { "class" : "o_left"}).text.strip()
+                        team_home_id    = match_odd.find('a')['id']
+                        bet_1           = match_odd.find('span', { "class" : "o_right "}).text.strip()
+            
+                        match_odd       = match.find('td', { "class" : "o_draw"})
+                        _               = match_odd.find('span', { "class" : "o_left"}).text.strip()
+                        bet_X           = match_odd.find('span', { "class" : "o_right "}).text.strip()
+                        team_X_id       = match_odd.find('a')['id']
+
+                        match_odd       = match.find('td', { "class" : "o_B "})
+                        team_away       = match_odd.find('span', { "class" : "o_left"}).text.strip()
+                        team_away_id    = match_odd.find('a')['id']
+                        bet_2           = match_odd.find('span', { "class" : "o_right "}).text.strip()
+                    match_date          = str(datetime.now().year) + ' ' + match.find('span', { "class" : "DateTime"}).text
+                    match_name          = team_home + '_' + team_away + '_' + match_date
+                    ligue_name          = ligue.text.strip()
     
-                            match_odd       = match.find('td', { "class" : "o_B "})
-                            team_away       = match_odd.find('span', { "class" : "o_left"}).text.strip()
-                            team_away_id    = match_odd.find('a')['id']
-                            bet_2           = match_odd.find('span', { "class" : "o_right "}).text.strip()
-                        match_date          = str(datetime.now().year) + ' ' + match.find('span', { "class" : "DateTime"}).text
-                        match_name          = team_home + '_' + team_away + '_' + match_date
-                        ligue_name          = ligue.text.strip()
-        
-                        team_home           = encode_decode(team_home)
-                        team_away           = encode_decode(team_away)
-                        match_name          = encode_decode(match_name)
-        
-                        match_date = date_ajustement_str(match_date, GMT_to_add)
+                    team_home           = encode_decode(team_home)
+                    team_away           = encode_decode(team_away)
+                    match_name          = encode_decode(match_name)
     
-                        dict_odds.update({match_name:{
-                                                    'match_date' : match_date,
-                                                    'team_home'  : team_home,
-                                                    'team_home_id'  : team_home_id,
-                                                    'team_away'  : team_away,
-                                                    'team_away_id'  : team_away_id,
-                                                    'team_X_id'  : team_X_id,
-                                                    'bet_1'      : bet_1,
-                                                    'bet_X'      : bet_X,
-                                                    'bet_2'      : bet_2,
-                                                    'sport'      : sport,
-                                                    'sport_id'      : sport_id,
-                                                    'ligue'      : ligue_name,
-                                                    }}) 
-    #                    print sport
+                    match_date = date_ajustement_str(match_date, GMT_to_add)
+
+                    dict_odds.update({match_name:{
+                                                'match_date' : match_date,
+                                                'team_home'  : team_home,
+                                                'team_home_id'  : team_home_id,
+                                                'team_away'  : team_away,
+                                                'team_away_id'  : team_away_id,
+                                                'team_X_id'  : team_X_id,
+                                                'bet_1'      : bet_1,
+                                                'bet_X'      : bet_X,
+                                                'bet_2'      : bet_2,
+                                                'sport'      : sport,
+                                                'sport_id'      : sport_id,
+                                                'ligue'      : ligue_name,
+                                                }}) 
+#                    print sport
         
-                except:
-                    pass
+#                except:
+#                    pass
     
     dict_odds_new = {}
     for k,v in dict_odds.iteritems():
