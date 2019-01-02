@@ -3,10 +3,11 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pyc
-*.json
+
 
 # local folder
 dataset/local/**
+model/local/**
 algo/venv/**
 algo/*.zip
 node_modules
