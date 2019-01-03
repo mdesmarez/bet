@@ -56,9 +56,15 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     
     df_single_filter.match_date  = df_single_filter.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
+    df_futur_bet       = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=60*12)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
+    df_futur_bet.drop_duplicates(subset=['match_date','team_home'], inplace=True)
+    df_futur_bet.to_csv('../dataset/local/df_futur_bet.xls', encoding='utf-8')
+    
+    
     df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
-        
+
+
     # =============================================================================
     # Print opportunity SINGLE
     # =============================================================================
