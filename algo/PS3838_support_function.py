@@ -637,21 +637,22 @@ def optimisation_7(df_train, dict_training_option):
                 
                 list_test.append([sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_SX, date, mode])
                 
+                limit_number_exemple = 10
                 
-                if int(result)/float(len(df_train_mod)) > limit_DC and mode == 'S' and len(df_train_mod)>50 :
+                if int(result)/float(len(df_train_mod)) > limit_DC and mode == 'S' and len(df_train_mod)>limit_number_exemple :
                     list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'S', int(result)/float(len(df_train_mod)), perc_win_good, bet_diff_high_SX])
                     dict_temp.update({sport:list_mod_ok})
                     
-                if int(result_DNB)/float(len(df_train_mod)) > limit_DC and mode == 'DNB' and len(df_train_mod)>50:
+                if int(result_DNB)/float(len(df_train_mod)) > limit_DC and mode == 'DNB' and len(df_train_mod)>limit_number_exemple:
                     list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DNB', int(result_DNB)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
                     dict_temp.update({sport:list_mod_ok})
    
-                if int(result_WNB)/float(len(df_train_mod)) > limit_DC and mode == 'WNB' and len(df_train_mod)>50:
+                if int(result_WNB)/float(len(df_train_mod)) > limit_DC and mode == 'WNB' and len(df_train_mod)>limit_number_exemple:
 #                    print sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win    
                     list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'WNB', int(result_WNB)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
                     dict_temp.update({sport:list_mod_ok})
                     
-                if int(result_DC)/float(len(df_train_mod)) > limit_DC and mode == 'DC' and len(df_train_mod)>50:
+                if int(result_DC)/float(len(df_train_mod)) > limit_DC and mode == 'DC' and len(df_train_mod)>limit_number_exemple:
 #                    print sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win    
                     list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DC', int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
                     dict_temp.update({sport:list_mod_ok})                    

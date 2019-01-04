@@ -71,8 +71,8 @@ day_shift                   = 0
 total_result                = 0
 total_cave                  = 0
 total_nbr_bet               = 0
-list_day_shift              = list(np.linspace(0,38,39))
-#list_day_shift              = [1]#, 1, 2, 3, 4, 5]#, 6, 7]#, 8, 9, 10]
+list_day_shift              = list(np.linspace(0,45,46))
+#list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7]#, 8, 9, 10]
 #list_day_shift              = [10, 11, 12, 13]#, 4, 5, 6, 7]#, 8, 9, 10]
 df_loss                     = pd.DataFrame()
 df_win                      = pd.DataFrame()
@@ -87,7 +87,7 @@ df_parameter_sport          = pd.DataFrame()
 
 
 for day_shift in list_day_shift:
-    mise       = bankroll*4/100
+#    mise       = bankroll*4/100
     result     = 0
     cave       = 0.001
         
@@ -128,15 +128,17 @@ for day_shift in list_day_shift:
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result']
         except:
             dict_result_sport.update({sport:{'result':0}})
-            
+                                
 
         if df_single_filter.mode_bet.iloc[item] == 'DC':
             cave = cave + mise
             result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
-            
+
             if df_single_filter.good_pred.iloc[item] == 1 or df_single_filter.winner.iloc[item] == 0:
                 result = result + bet_DC*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_DC*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_DC*mise
                 num_good_draw_pred = num_good_draw_pred + 1
                 df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
@@ -148,16 +150,21 @@ for day_shift in list_day_shift:
         if df_single_filter.mode_bet.iloc[item] == 'DNB':
             cave = cave + mise
             result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
 
             if df_single_filter.good_pred.iloc[item] == 1:
                 result = result + bet_DNB*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_DNB*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_DNB*mise
+
                 df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
                 
             if df_single_filter.winner.iloc[item] == 0:
                 result = result + mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + mise
+
                 num_good_draw_pred = num_good_draw_pred + 1
                 df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
 
@@ -170,17 +177,22 @@ for day_shift in list_day_shift:
         if df_single_filter.mode_bet.iloc[item] == 'WNB':
             cave = cave + mise
             result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
 
             
             if df_single_filter.good_pred.iloc[item] == 1:
                 result = result + mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + mise
+
                 df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
                 
             if df_single_filter.winner.iloc[item] == 0:
                 result = result + bet_WNB*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_WNB*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_WNB*mise
+
                 num_good_draw_pred = num_good_draw_pred + 1
                 df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
             
@@ -193,10 +205,12 @@ for day_shift in list_day_shift:
         if df_single_filter.mode_bet.iloc[item] == 'X':
             cave = cave + mise*2
             result = result - mise*2
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise*2})
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise*2
 
             if df_single_filter.good_pred.iloc[item] == 1 and df_single_filter.winner.iloc[item] != 0:
                 result = result + df_single_filter.min_bet.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise
 
                 num_good_draw_pred = num_good_draw_pred + 1
@@ -204,6 +218,7 @@ for day_shift in list_day_shift:
             
             if df_single_filter.winner.iloc[item] == 0:
                 result = result + df_single_filter.bet_X.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + df_single_filter.bet_X.iloc[item]*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.bet_X.iloc[item]*mise
 
                 num_good_draw_pred = num_good_draw_pred + 1
@@ -217,10 +232,12 @@ for day_shift in list_day_shift:
         if df_single_filter.mode_bet.iloc[item] == 'S':
             cave = cave + mise
             result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
             dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
 
             if df_single_filter.good_pred.iloc[item] == 1:
                 result = result + df_single_filter.min_bet.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + + df_single_filter.min_bet.iloc[item]*mise})
                 dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise
 
                 num_good_pred = num_good_pred + 1
@@ -268,10 +285,11 @@ for day_shift in list_day_shift:
     try:
         list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
         for sport in list_sport_win_loss:
-            print sport, ' : ', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%', '==>', round(dict_result_sport[sport]['result'],2), 'euros'
-            list_mod_win_loss = list(set(df_win[u'mod'].unique().tolist()+df_loss[u'mod'].unique().tolist()))
-            for mod in list_mod_win_loss:
-                print '       : ', round(100*len(df_win[df_win[u'mod'] == mod])/float(len(df_win[df_win[u'mod'] == mod])+len(df_loss[df_loss[u'mod'] == mod])),2),'%', '==>', mod
+            total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
+            print sport.ljust(13), ' : ', ' total : ', total, ' perc : ' , round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%', '==>', round(dict_result_sport[sport]['result'],2), 'euros'
+#            list_mod_win_loss = list(set(df_win[u'mod'].unique().tolist()+df_loss[u'mod'].unique().tolist()))
+#            for mod in list_mod_win_loss:
+#                print '       : ', round(100*len(df_win[df_win[u'mod'] == mod])/float(len(df_win[df_win[u'mod'] == mod])+len(df_loss[df_loss[u'mod'] == mod])),2),'%', '==>', mod
     except:
         pass
     print '******************************************'
@@ -286,7 +304,14 @@ df_dict_result.sort_index(inplace=True)
 
 title = 'mise : ' + str(int(mise))
 df_dict_result.plot(title=title)
-        
+
+df_dict_result_sport = pd.DataFrame.from_dict(dict_result_sport, orient='index').T
+df_dict_result_sport = df_dict_result_sport[df_dict_result_sport.index != 'result']
+df_dict_result_sport.sort_index(ascending=False,inplace=True)
+df_dict_result_sport = df_dict_result_sport.fillna(method='bfill')
+df_dict_result_sport.fillna(0, inplace=True)
+df_dict_result_sport['total'] = df_dict_result_sport.sum(axis=1)
+df_dict_result_sport.plot()
 
 
 
