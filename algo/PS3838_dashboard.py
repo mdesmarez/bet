@@ -41,6 +41,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_single = pd.DataFrame.from_csv('../dataset/local/df_single.xls', encoding='utf-8')
     df_single.sport = df_single.sport.apply(lambda x : x.lower().replace('-',' '))
     df_result_single = df_result.copy()
+    df_result_single.dropna(inplace=True)
     df_result_single.sport = df_result_single.sport.apply(lambda x : x.lower().replace('-',' '))
     
     ###
@@ -247,15 +248,24 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_futur_bet.set_index('match_date', drop=True, inplace=True)
     df_futur_bet = df_futur_bet[['sport', 'team_home', 'mode_bet', 'min_bet']]
     df_futur_bet.columns = ['sport', 'team home', 'mode', 'bet']
+    df_futur_bet.sort_index(ascending=True, inplace=True)
 
     
     ###
+    date_min = datetime.now()-timedelta(hours=6)
+    df_single_ongoing.match_date                = df_single_ongoing.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
+    df_single_ongoing = df_single_ongoing[df_single_ongoing.match_date >  date_min]
     df_single_ongoing.set_index('match_date', drop=True, inplace=True)
     df_single_ongoing = df_single_ongoing[['sport', 'team_to_bet', 'mode_bet', 'min_bet']]
     df_single_ongoing.columns = ['sport', 'team to bet', 'mode', 'bet']
     
     ###
     df_merge_single_bet_view = df_merge_single_bet.copy()
+    
+    df_merge_single_bet_view.good_pred[(df_merge_single_bet_view.mode_bet == 'WNB') & (df_merge_single_bet_view.good_pred == 1)] = '-'
+    df_merge_single_bet_view.good_pred[(df_merge_single_bet_view.mode_bet == 'WNB') & (df_merge_single_bet_view.winner == 0)] = 1
+    
+    
     df_merge_single_bet_view.set_index('match_date', drop=True, inplace=True)
     df_merge_single_bet_view = df_merge_single_bet_view[['sport', 'team_home', 'mode_bet', 'good_pred']]
     df_merge_single_bet_view.columns = ['sport', 'team home', 'mode', 'good']
@@ -267,8 +277,8 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     try:
         print('********      ON GOING     **********')
         print 'Heure              : ', str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S'))
-        print 'Bet OnGoing        : ', (len(df_betting_single_done)-len(df_merge_single_bet))
-        print 'Cave OnGoing       : ', (len(df_betting_single_done)-len(df_merge_single_bet))*mise
+        print 'Bet OnGoing        : ', len(df_single_ongoing)
+        print 'Cave OnGoing       : ', len(df_single_ongoing)*mise
         print(tabulate(df_single_ongoing, headers='keys', tablefmt='psql'))
         
         print('\n\n')
@@ -277,7 +287,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         print 'Number Good pred   : ', num_good_pred
         print 'Number Draw pred   : ', num_good_draw_pred
         print 'Number Bad pred    : ', num_bad_pred
-        print 'Perc Win Bet       : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.00001)*100,2), '%'
+        print 'Perc Win Bet       : ', round((num_good_pred+num_good_draw_pred)/float(num_good_pred+num_good_draw_pred+num_bad_pred+0.00001)*100,2), '%'
         print('\n')
         print 'GAIN TOTAL         : ', int(total_result), 'euros'
         print 'INVEST TOTAL       : ', int(total_cave), 'euros'
@@ -291,10 +301,10 @@ def dashboard(dict_parameter_sport, GMT_to_add):
 
         print('\n\n')
         print('********       RESULTS      **********')
-        print(tabulate(df_merge_single_bet_view, headers='keys', tablefmt='psql'))
+        print(tabulate(df_merge_single_bet_view.iloc[0:10], headers='keys', tablefmt='psql'))
         
         print('\n\n')
-        print('********        FUTURS      **********')
+        print('********     FUTURS 12H      **********')
         print(tabulate(df_futur_bet, headers='keys', tablefmt='psql'))
         
         print('\n\n')

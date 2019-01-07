@@ -37,6 +37,7 @@ df_result = pd.DataFrame.from_csv('../dataset/local/df_result.xls', encoding='ut
 df_single = pd.DataFrame.from_csv('../dataset/local/df_single.xls', encoding='utf-8')
 df_single.sport = df_single.sport.apply(lambda x : x.lower().replace('-',' '))
 df_result_single = df_result.copy()
+df_result_single.dropna(inplace=True)
 df_result_single.sport = df_result_single.sport.apply(lambda x : x.lower().replace('-',' '))
 
 ###
@@ -61,7 +62,7 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 # =============================================================================
 # 
 # =============================================================================
-initial_bankroll            = 500
+initial_bankroll            = 300
 bankroll                    = initial_bankroll
 mise                        = 20
 min_cave                    = 0
@@ -71,7 +72,7 @@ day_shift                   = 0
 total_result                = 0
 total_cave                  = 0
 total_nbr_bet               = 0
-list_day_shift              = list(np.linspace(0,45,46))
+list_day_shift              = list(np.linspace(0,50,51))
 #list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7]#, 8, 9, 10]
 #list_day_shift              = [10, 11, 12, 13]#, 4, 5, 6, 7]#, 8, 9, 10]
 df_loss                     = pd.DataFrame()
@@ -85,9 +86,12 @@ df_merge_single_modif       = df_merge_single.copy()
 df_parameter_sport          = pd.DataFrame()
 
 
+#######
+df_single = df_single[((df_single.sport == 'hockey') & (df_single.bet_X != 0)) | (df_single.sport == 'soccer')]
+df_single.dropna(inplace=True)
 
 for day_shift in list_day_shift:
-#    mise       = bankroll*4/100
+#    mise       = bankroll*3/100
     result     = 0
     cave       = 0.001
         
@@ -110,7 +114,7 @@ for day_shift in list_day_shift:
     df_single_filter = optimisation_7_apply(df_test, dict_parameter_sport)
 #        df_parameter_sport = pd.concat((df_parameter_sport, df_parameter_sport_temp))
 
-
+    
     num_good_pred         = 0
     num_good_draw_pred    = 0
     num_bad_pred          = 0
@@ -296,11 +300,12 @@ for day_shift in list_day_shift:
 
 
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
-    dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result}})
+    dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result,'result':result}})
 
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
 df_dict_result.sort_index(inplace=True)
+df_dict_result['line'] = 0
 
 title = 'mise : ' + str(int(mise))
 df_dict_result.plot(title=title)

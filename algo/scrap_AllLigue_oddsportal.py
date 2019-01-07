@@ -19,6 +19,7 @@ import time
 import datetime
 import re
 import ast
+import json
 
 import pandas             as pd
 import numpy              as np
@@ -37,13 +38,6 @@ from datetime             import datetime
 # =============================================================================
 # 
 # =============================================================================
-#df_NHL_scores               = pd.read_csv('../dataset/local/df_NHL_scores_espn.csv', index_col=0, encoding='utf-8')
-#df_NHL_scores.dropna(subset=['date_match'], inplace=True)
-#df_NHL_scores['date_match'] = pd.to_datetime(df_NHL_scores.date_match)
-#df_NHL_scores.dropna(subset=['match_name'],inplace=True)
-#df_NHL_scores.reset_index(drop=True, inplace=True)
-#df_NHL_scores.sort_values(['date_match'], inplace=True, ascending=True)
-
 process_scrap                   = 1
 process_scrap_current_season    = 0
 process_scrap_next_match        = 0
@@ -51,119 +45,234 @@ process_generate                = 0
 
 this_year                       = 2018
 list_year                       = [2016, 2017, 2018]
-#list_year  = [2016, 2017, 2018]
-
-list_ligue = [
-#                [u'handball', u'france', u'lidl-starligue'],
-#                [u'handball', u'germany', u'bundesliga'],
-#                [u'handball', u'switzerland', u'nla'],
-#                [u'handball', u'spain', u'liga-asobal'],
-#                [u'handball', u'portugal', u'andebol-1'],
-#                [u'handball', u'russia', u'superleague'],
-#                [u'handball', u'denmark', u'herre-handbold-ligaen'],
-#                [u'handball', u'norway', u'nm-cup'],
-#                [u'handball', u'sweden', u'handbollsligan'],
 
 
-#                [u'tennis', u'argentina', u'atp-buenos-aires'],
-#                [u'tennis', u'australia', u'atp-australian-open'],
-#                [u'tennis', u'australia', u'atp-brisbane'],
-#                [u'tennis', u'austria', u'atp-kitzbuhel-doubles'],
-#                [u'tennis', u'belgium', u'mons-challenger-men'],
-#                [u'tennis', u'brazil', u'atp-sao-paulo'],
-#                [u'tennis', u'bulgaria', u'atp-sofia-doubles'],
-#                [u'tennis', u'china', u'atp-beijing'],
-#                [u'tennis', u'china', u'atp-chengdu'],
-#                [u'tennis', u'china', u'atp-shenzhen'],
-#                [u'tennis', u'france', u'atp-marseille'],
-#                [u'tennis', u'france', u'atp-paris'],
+# =============================================================================
+# 
+# =============================================================================
+def bs4_recover_bet(soup, dict_odds, pays, sport, ligue):
+    match_list                  = soup.find_all('tr', { "class" : "deactivate"}) + soup.find_all('tr', { "class" : "odd deactivate"})
 
-        
-        
-        
-#                [u'baseball', u'usa', u'handbollsligan'],
-#
-#                [u'basketball', u'spain', u'acb'],
-#                [u'basketball', u'italy', u'lega-a'],
-#                [u'basketball', u'usa', u'nba'],
-#                [u'basketball', u'germany', u'bbl'],
-#                [u'basketball', u'russia', u'vtb-united-league'],                
-#                [u'basketball', u'finland', u'korisliiga'],
-#
-#                
-#                [u'volleyball', u'italy', u'serie-a1'],
-#                [u'volleyball', u'brazil', u'superliga-women'],
-#                [u'volleyball', u'russia', u'superleague'],
-#                [u'volleyball', u'france', u'ligue-a'],
-#                [u'volleyball', u'germany', u'1-bundesliga'],
-#                [u'volleyball', u'argentina', u'serie-a1'],
-#                [u'volleyball', u'poland', u'plusliga'],
+    for match in match_list:
+        try:
+            match_name              = match.find('td', { "class" : "name table-participant"}).text
+            match_date              = str(match.find_all('td')[0]).split('"')[1].split('t')[-1].split('-')[0]
+            team_home               = match_name.split('-')[0].strip()
+            team_away               = match_name.split('-')[1].strip()
+            if len(match.find_all('td', { "class" : "odds-nowrp"})) == 2:
+                bet_1                   = float(match.find_all('td', { "class" : "odds-nowrp"})[0].text)
+                bet_X                   = 0
+                bet_2                   = float(match.find_all('td', { "class" : "odds-nowrp"})[1].text) 
+            else:
+                bet_1                   = float(match.find_all('td', { "class" : "odds-nowrp"})[0].text)
+                bet_X                   = float(match.find_all('td', { "class" : "odds-nowrp"})[1].text)
+                bet_2                   = float(match.find_all('td', { "class" : "odds-nowrp"})[2].text)
+            score                   = match.find('td', { "class" : "center bold table-odds table-score"}).text
+            try:
+                score_home              = score.split(':')[0]
+                score_away              = score.split(':')[1].split(' ')[0]
+            except Exception,e :
+                score_home              = "999"
+                score_away              = "999"
+                print e                    
 
-
-#        
-#                [u'soccer', u'france', u'ligue-1'],
-#                [u'soccer', u'france', u'ligue-2'],
-#                
-#                [u'soccer', u'belgium', u'jupiler-league'],
-#                [u'soccer', u'belgium', u'proximus-league'],
-#                
-#                [u'soccer', u'portugal', u'primeira-liga'],
-#                [u'soccer', u'portugal', u'segunda-liga'],
-#
-#                [u'soccer', u'germany', u'bundesliga'],
-#                
-#                [u'soccer', u'netherlands', u'eredivisie'],
-#                
-#                [u'soccer', u'spain', u'laliga'],
-#                
-#                [u'soccer', u'england', u'premier-league'],
-#                [u'soccer', u'england', u'efl-cup'],
-#                [u'soccer', u'cyprus', u'first-division'],
-#                [u'soccer', u'bulgaria', u'parva-liga'],
-#                [u'soccer', u'italy', u'serie-a'],
-#                
-#                [u'soccer', u'croatia', u'1-hnl'],
-#                [u'soccer', u'argentina', u'superliga'],
-#                [u'soccer', u'switzerland', u'super-league'],
-#                [u'soccer', u'poland', u'ekstraklasa'],
-#                
-#                [u'soccer', u'algeria', u'ligue-1'],
-#                [u'soccer', u'czech-republic', u'1-liga'],
-#                [u'soccer', u'luxembourg', u'national-division'],
-#                
-#
-#                [u'soccer', u'serbia', u'prva-liga'],
-#                [u'soccer', u'scotland', u'premiership'],
-
+            if score_home > score_away:
+                result      = 1
+                result_bet  = bet_1 
+            if score_home < score_away:
+                result      = 2     
+                result_bet  = bet_2 
+            if score_home == score_away:
+                result      = 'X'
+                result_bet  = bet_X 
                 
+            dict_odds.update({match['xeid']+'_'+str(year):{
+                                'match_name' : match_name,
+                                'match_id'   : match['xeid'],
+                                'match_date' : match_date,
+                                'team_home'  : team_home,
+                                'team_away'  : team_away,
+                                'bet_1'      : bet_1,
+                                'bet_X'      : bet_X,
+                                'bet_2'      : bet_2,
+                                'result'     : result,
+                                'result_bet' : result_bet,
+                                'score'      : score,
+                                'score_home' : score_home,
+                                'score_away' : score_away,
+                                'ligue'      : ligue,
+                                'pays'       : pays,
+                                'sport'      : sport,
+                                }}) 
+        except Exception,e :
+            print e
+    return dict_odds
+
+
+# =============================================================================
+# 
+# =============================================================================
+try:    
+    with open('../dataset/local/dict_archived.json') as json_file:  
+        dict_archived = json.load(json_file)
+except:
+    dict_archived = {}
+
+    
+list_ligue = []
+list_sport = [\
+#              'volleyball', 
+#              'tennis',
+#              'handball',
+              'hockey',              
               ]
+
+
+for sport in list_sport:
+    if sport in list_sport:
+        print sport
+        try:
+            test = dict_archived[sport]
+        except:
+            dict_archived.update({sport:{}})
+        
+        url_page        = 'https://www.oddsportal.com/results/#' + sport
+        os.system('mkdir -p ' + '../dataset/local/' + sport + '/oddsportal/match')
+        save_web_page   = '../dataset/local/' + sport + '/oddsportal_' + sport + '_list_ligue.html'
+        os.system('rm "' + save_web_page + '"')
+        os.system('node scrap_odds_first_standalone.js ' + url_page + ' ' + save_web_page)
+        soup                        = BeautifulSoup(open(save_web_page), "html.parser")
+        ligue_list                  = soup.find_all('a', { "foo" : "f"})
+        for ligue in ligue_list:
+            ligue_name = ligue.text
+            ligue_href = ligue.get('href')
+            if ligue_href.split('/')[1] == sport:
+                try:
+                    test = dict_archived[sport][ligue_name]['done']
+                except:
+                    dict_archived[sport].update({ligue_name:{}})
+                    dict_archived[sport][ligue_name].update({'href':ligue_href,'done':0, 'pays':ligue_href.split('/')[2]})
+                    list_ligue.append([ligue_href.split('/')[1],ligue_href.split('/')[2],ligue_href.split('/')[3]])
+
+### SAVE
+with open('../dataset/local/dict_archived.json', 'w') as outfile:
+    json.dump(dict_archived, outfile)
 
 
 
 # =============================================================================
 # 
 # =============================================================================
-list_ligue = []
-list_sport = [\
-#              'volleyball', 
-#              'tennis',
-              'mma',
-              ]
+for sport, sport_v in dict_archived.items():
+    if sport in list_sport:
+        print sport
+        for ligue, ligue_v in dict_archived[sport].items():
+            if ligue_v['done'] == 0:
+                url_ligue = 'https://www.oddsportal.com/' + ligue_v['href']
+                save_temp = '../dataset/local/' + sport + '/save_temp.html'
+                os.system('rm "' + save_temp + '"')
+                os.system('node scrap_odds_first_standalone.js ' + url_ligue + ' ' + save_temp)
+                soup              = BeautifulSoup(open(save_temp), "html.parser")
+                season_list_all   = soup.find_all('div', { "class" : "main-menu2 main-menu-gray"})
+                if season_list_all != []:
+                    season_list_all   = season_list_all[0].find('ul', { "class" : "main-filter"})
+                    season_list       = season_list_all.find_all('li')
+        
+                    ligue_v['done'] = 1
+                    for i in range(len(season_list)):
+                        season_url    = season_list[i].a.get('href')
+                        season_text   = season_list[i].text
+                        print season_text
+                        try:
+                            if int(season_text.split('/')[0]) in list_year:
+                                print ligue, '*************'
+                                ligue_v.update({season_text.split('/')[0]:season_url, 'done':2})
+                        except Exception,e :
+                            print e                    
+    
+                ### SAVE
+                with open('../dataset/local/dict_archived.json', 'w') as outfile:
+                    json.dump(dict_archived, outfile)
+        
 
-for sport in list_sport:
-    url_page        = 'https://www.oddsportal.com/results/#' + sport
-    os.system('mkdir -p "' + '../dataset/local/' + sport + '"')
-    save_web_page   = '../dataset/local/' + sport + '/oddsportal_' + sport + '_list_ligue.html'
-    os.system('node scrap_odds_first_standalone.js ' + url_page + ' ' + save_web_page)
-    soup                        = BeautifulSoup(open(save_web_page), "html.parser")
-    ligue_list                  = soup.find_all('a', { "foo" : "f"})
-    for ligue in ligue_list:
-        ligue_name = ligue.text
-        ligue_href = ligue.get('href')
-        if ligue_href.split('/')[1] == sport:
-            list_ligue.append([ligue_href.split('/')[1],ligue_href.split('/')[2],ligue_href.split('/')[3]])
+# =============================================================================
+# 
+# =============================================================================
+#%%
+for sport, sport_v in dict_archived.items():
+    if sport in list_sport:
+        print sport
+        for ligue, ligue_v in dict_archived[sport].items():
+            dict_odds = {}
+            if ligue_v['done'] == 2:
+                pays = ligue_v['pays']
+                for year in list_year:
+                    if str(year) in ligue_v:
+                        ###
+                        url_ligue_year = 'https://www.oddsportal.com' + ligue_v[str(year)]    
+                        print url_ligue_year
+                        save_web_page   = '../dataset/local/' + sport + '/oddsportal_' + sport + '_list_ligue_year.html'
+                        os.system('rm "' + save_web_page + '"')
+                        os.system('node scrap_odds_first_standalone.js ' + url_ligue_year + ' ' + save_web_page)                    
+                        ###
+                        soup              = BeautifulSoup(open(save_web_page), "html.parser")
+                        page_max_number = 0
+                        find_page_max     = soup.find_all('div', { "id" : "pagination"})
+                        if find_page_max != []:
+                            page_max_number = find_page_max[0].find_all('a')[-1].get('x-page')
+                        else:
+                            page_max_number = 0
+                        
+                        dict_odds = bs4_recover_bet(soup, dict_odds, pays, sport, ligue)
+                        
+                        if page_max_number !=0:
+                            for i in range(int(page_max_number)-1):
+                                url_ligue_year = 'https://www.oddsportal.com' + ligue_v[str(year)] + '#/page/' + str(i+2) + '/'
+                                print url_ligue_year
+                                save_web_page   = '../dataset/local/' + sport + '/oddsportal_' + sport + '_list_ligue_year.html'
+                                os.system('rm "' + save_web_page + '"')
+                                os.system('node scrap_odds_first_standalone.js ' + url_ligue_year + ' ' + save_web_page)                    
+                                ###
+                                soup              = BeautifulSoup(open(save_web_page), "html.parser")
+                                dict_odds = bs4_recover_bet(soup, dict_odds, pays, sport, ligue)
+    
+            if dict_odds != {}:
+                df_temp         = pd.DataFrame.from_dict(dict_odds, orient='index')
+                df_temp.to_csv('../dataset/local/' + sport + '/df_oddsportal_' + sport + '_' + pays + '_' + ligue + '.csv', encoding='utf-8')
+            ligue_v['done'] = 3
+    
+            ### SAVE
+            with open('../dataset/local/dict_archived_final.json', 'w') as outfile:
+                json.dump(dict_archived, outfile)
+                
+
+# =============================================================================
+# 
+# =============================================================================
+with open('../dataset/local/dict_archived.json') as json_file:  
+    dict_archived = json.load(json_file)
+    
+for sport, sport_v in dict_archived.items():
+    print sport
+    try:    
+        df_sport = pd.read_csv('../dataset/local/' + sport + '/df_ALL_' + sport + '.xls', index_col=0, encoding='utf-8')
+        df_sport.drop_duplicates('match_id', inplace=True)
+    except:
+        df_sport = pd.DataFrame()
 
 
+    list_all             = glob('../dataset/local/' + sport + '/df_oddsportal_' + sport + '*.csv')
+    for i, item in enumerate(list_all):    
+        df_sport_temp = pd.read_csv(item, index_col=0, encoding='utf-8')
+        df_sport = pd.concat((df_sport, df_sport_temp))
+        print i, len(list_all)
+        
+    df_sport.drop_duplicates('match_id', inplace=True)
+    df_sport.to_csv('../dataset/local/' + sport + '/df_ALL_' + sport + '.xls', encoding='utf-8')
+
+
+
+eeee
 # =============================================================================
 # 
 # =============================================================================
@@ -183,20 +292,19 @@ list_ligue_diff     = list(set(list_ligue)-set(list_ligue_already))
 
 list_ligue_diff     = [ast.literal_eval(item) for item in list_ligue_diff]
 
-
+ee
 # =============================================================================
 # 
 # =============================================================================
-df_oddsportal           = pd.DataFrame()
-dict_odds               = {}
+df_oddsportal   = pd.DataFrame()
+dict_odds       = {}
         
 for item in list_ligue_diff:
-    sport   = item[0]
-    pays    = item[1]
-    ligue   = item[2]
+    sport       = item[0]
+    pays        = item[1]
+    ligue       = item[2]
     
     os.system('mkdir -p ' + '../dataset/local/' + sport + '/oddsportal/match')
-    
     # =============================================================================
     # Recover link to each match for each season in all pages of website
     # =============================================================================
@@ -206,7 +314,7 @@ for item in list_ligue_diff:
             
             if year == this_year:
                 break
-            
+            ee
             season                          = str(year) + '-' + str(year+1)
             url_season                      = 'https://www.oddsportal.com/' + sport + '/' + pays + '/' + ligue + '-' + season + '/results/#/page/'
             for page_num in range(35):

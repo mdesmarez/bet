@@ -60,8 +60,8 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     df_futur_bet.drop_duplicates(subset=['match_date','team_home'], inplace=True)
     df_futur_bet.to_csv('../dataset/local/df_futur_bet.xls', encoding='utf-8')
     
-    
-    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=30)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
+    limit_before_bet = 10
+    df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=limit_before_bet)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
 
 
@@ -112,25 +112,38 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
         # =============================================================================
         # EXECUTE BET
         # =============================================================================
+        stake = 20
         """
-        df_betting_single_X = df_betting_single[df_betting_single.mode_bet == 'X']
-        df_betting_single_S = df_betting_single[df_betting_single.mode_bet == 'S']
 
-        team_X_id       = str(df_betting_single.team_X_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
-        team_to_bet_id  = str(df_betting_single.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
-        sport_to_bet    = str(df_betting_single.sport.tolist())[1:-1].replace('u','').replace("'","")
-
+        ###
+        df_betting_single_S               = df_betting_single[df_betting_single.mode_bet == 'S']
         if len(df_betting_single_S) != 0:
-            print 'bet_S'
+            df_betting_single_S['stake']      = stake
+            team_to_bet_id                    = str(df_betting_single_S.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
+            sport_to_bet                      = str(df_betting_single_S.sport.tolist())[1:-1].replace('u','').replace("'","")
+            stake_to_bet                      = str(df_betting_single_S.stake.tolist())[1:-1].replace('u','').replace("'","")
             print df_betting_single_S
-#            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
+            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '" "' + stake_to_bet + '"')
+
         
-        if len(df_betting_single_X) != 0:
-            print 'bet_X'
-            print df_betting_single_X
-            team_to_bet_id  = team_to_bet_id + ',' + team_X_id
-            sport_to_bet    = sport_to_bet + ', ' + sport_to_bet    
-#            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '"')
+        ###
+        df_betting_single_WNB             = df_betting_single[df_betting_single.mode_bet == 'WNB']
+        if len(df_betting_single_WNB) != 0:
+            df_betting_single_WNB['stake_1']  = df_betting_single_WNB.min_bet.apply(lambda x: round((1-1/x)*stake,2))
+            df_betting_single_WNB['stake_X']  = df_betting_single_WNB.min_bet.apply(lambda x: round(stake/float(x),2))
+    
+            team_to_bet_id_1                  = str(df_betting_single_WNB.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
+            team_to_bet_id_X                  = str(df_betting_single_WNB.team_X_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
+            sport_to_bet_1                    = str(df_betting_single_WNB.sport.tolist())[1:-1].replace('u','').replace("'","")
+            stake_to_bet_1                    = str(df_betting_single_WNB.stake_1.tolist())[1:-1].replace('u','').replace("'","")
+            stake_to_bet_X                    = str(df_betting_single_WNB.stake_X.tolist())[1:-1].replace('u','').replace("'","")
+    
+            team_to_bet_id  = team_to_bet_id_1 + ',' + team_to_bet_id_X
+            sport_to_bet    = sport_to_bet + ', ' + sport_to_bet 
+            stake_to_bet    = stake_to_bet_1 + ', ' + stake_to_bet_X 
+            print df_betting_single_WNB
+            os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '" "' + stake_to_bet + '"')
+
         """
         
         try:

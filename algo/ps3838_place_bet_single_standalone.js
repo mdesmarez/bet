@@ -10,7 +10,7 @@ const invisible_nav = true
 var args = process.argv.slice(2);
 console.log(args[0])
 console.log(args[1])
-
+console.log(args[2])
 
 /*************************************************************************** */
 /* Functions                                                                 */
@@ -97,6 +97,8 @@ async function Oddsportal_scrap(invisible_nav) {
     console.log(list_bet);
     var list_sport = args[1].split(",") //[["soccer","918043169|0|1|0|0|0"]];
     console.log(list_sport);
+    var list_money = args[2].split(",") //[["soccer","918043169|0|1|0|0|0"]];
+    console.log(list_money);
 
 
     async function select_sport(sport) {
@@ -180,6 +182,7 @@ async function Oddsportal_scrap(invisible_nav) {
     let item_number = 0
     await asyncForEach(list_bet, async (element) => {
         const sport = list_sport[item_number].trim();
+        const money = list_money[item_number].trim();
         console.log(sport);
         item_number = item_number + 1;
         await waitFor(300);
@@ -188,7 +191,15 @@ async function Oddsportal_scrap(invisible_nav) {
         const bet_id = '//*[@id="' + element + '"]'
         console.log(bet_id);
         clickByXPATH(page, bet_id);
-        await waitFor(500);
+        await waitFor(1000);
+        clickByXPATH(page, '//*[@id="betslip-content"]/div/form/div[2]/div[7]/div/div[2]/input');
+        await waitFor(1000);
+        await page.keyboard.down( 'Control' );
+        await page.keyboard.press( 'A' );
+        await page.keyboard.up( 'Control' );
+        await page.keyboard.press( 'Backspace' );
+        await page.keyboard.type(money);
+        await waitFor(1000);
         clickByXPATH(page, '//*[@id="betslip-content"]/div/form/div[7]/div/input');
         await waitFor(1500);
         //clickByXPATH(page, '//*[@id="euro-sports"]/div[4]/div[3]/div/button[1]/span');
