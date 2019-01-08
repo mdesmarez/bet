@@ -75,7 +75,7 @@ async function Oddsportal_scrap(invisible_nav) {
 
     // GO TO PAGE
     await page.goto('https://www.ps3838.com/en/euro/sports/mix-parlay');    
-    await page.waitFor(1 * 4000);
+    await page.waitFor(1 * 3000);
     
     
     // LOG SECTION
@@ -191,25 +191,25 @@ async function Oddsportal_scrap(invisible_nav) {
         const bet_id = '//*[@id="' + element + '"]'
         console.log(bet_id);
         clickByXPATH(page, bet_id);
-        await waitFor(1000);
+        await waitFor(300);
         clickByXPATH(page, '//*[@id="betslip-content"]/div/form/div[2]/div[7]/div/div[2]/input');
-        await waitFor(1000);
+        await waitFor(300);
         await page.keyboard.down( 'Control' );
         await page.keyboard.press( 'A' );
         await page.keyboard.up( 'Control' );
         await page.keyboard.press( 'Backspace' );
         await page.keyboard.type(money);
-        await waitFor(1000);
+        await waitFor(500);
         clickByXPATH(page, '//*[@id="betslip-content"]/div/form/div[7]/div/input');
-        await waitFor(1500);
-        //clickByXPATH(page, '//*[@id="euro-sports"]/div[4]/div[3]/div/button[1]/span');
         await waitFor(1000);
+        //clickByXPATH(page, '//*[@id="euro-sports"]/div[4]/div[3]/div/button[1]/span');
+        await waitFor(100);
       });
       console.log('Done');
 
 
     //
-    await page.waitFor(1 * 10000);
+    await page.waitFor(1 * 100);
 
     // close browser
     browser.close();

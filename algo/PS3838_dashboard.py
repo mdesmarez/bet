@@ -297,8 +297,23 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         print 'ROI cave           : ', round(total_result/float(total_cave)*100,2), '%'
         print 'ROC cave           : ', round(total_result/float(bankroll)*100,2), '%'
         print 'MIN CAVE           : ', int(min_cave), 'euros ==>', int(round(min_cave/mise))
-        print 'MAX CAVE           : ', int(max_cave), 'euros ==>', int(round(max_cave/mise))
-
+        print 'MAX CAVE           : ', int(max_cave), 'euros ==>', int(round(max_cave/mise))    
+        print ''
+        try:
+            list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
+            for sport in list_sport_win_loss:
+                df_win['mod'] = df_win.min_bet/dict_parameter_sport['option'][sport]['mod_value']
+                df_win['mod'] = df_win['mod'].apply(lambda x: int(x))
+                df_loss['mod'] = df_loss.min_bet/dict_parameter_sport['option'][sport]['mod_value']
+                df_loss['mod'] = df_loss['mod'].apply(lambda x: int(x))
+                total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
+                print sport, '==> ', total, '-', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%'
+                list_mod_win_loss = list(set(df_win[u'mod'][df_win.sport == sport].unique().tolist()+df_loss[u'mod'][df_loss.sport == sport].unique().tolist()))
+                for mod in list_mod_win_loss:
+                    print '                   ==> ', str(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])).rjust(4), '-',  round(100*len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])/float(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])),1),'%', '==>', round(mod*0.1,1), '/', round((mod+1)*0.1,1)
+        except:
+            pass
+        
         print('\n\n')
         print('********       RESULTS      **********')
         print(tabulate(df_merge_single_bet_view.iloc[0:10], headers='keys', tablefmt='psql'))

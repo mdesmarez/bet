@@ -145,6 +145,67 @@ with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
 
 ee
 # =============================================================================
+# esports
+# =============================================================================
+### LOAD DATA
+#df_ALL = pd.DataFrame.from_csv('../dataset/local/df_ALL.xls', encoding='utf-8')
+df_ALL = pd.DataFrame.from_csv('../dataset/local/esports/df_ALL_esports.xls', encoding='utf-8')
+#df_ALL = df_merge_single.copy()
+
+df_esports = df_ALL[df_ALL.sport == 'esports']
+
+#df_esports = df_esports[df_esports.ligue == 'NHL']
+    
+df_esports['sport']       = 'e sports'
+df_esports['bet_diff']    = df_esports.bet_1-df_esports.bet_2
+df_esports['min_bet']     = 0
+df_esports['prediction']  = 0
+df_esports['prediction']  = 0
+df_esports['good_pred']   = 0
+df_esports['bad_pred']    = 0
+df_esports['winner']      = df_esports['result']  
+df_esports['min_bet']     = df_esports[['bet_1','bet_2']].min(axis=1)
+df_esports['prediction']  = df_esports.bet_diff.apply(lambda x : "1" if x<0 else "2")
+df_esports['bet_diff']    = abs(df_esports['bet_diff'])
+
+df_esports = df_esports[['match_date', 'sport', 'ligue','bet_1', 'bet_2', 'bet_X', 'bet_diff', 'min_bet', 'winner', 'prediction', 'team_home', 'good_pred', 'bad_pred']]
+
+df_esports.winner[df_esports.winner == 'X'] = 0
+df_esports.winner[df_esports.winner == '1'] = 1
+df_esports.winner[df_esports.winner == '2'] = 2
+
+df_esports.winner = df_esports.winner.astype(int)
+df_esports.prediction = df_esports.prediction.astype(int)
+df_esports['good_pred'] = 0
+df_esports.good_pred[df_esports.winner == df_esports.prediction] = 1    
+df_esports.bad_pred[df_esports.good_pred != 1] = 1
+
+df_esports.match_date = df_esports.match_date.apply(lambda x : datetime.fromtimestamp(x))#.strftime('%Y-%m-%d %H:%M:%S'))
+
+df_test  = df_esports[df_esports.match_date > datetime(2017, 8, 8, 0, 46, 43, 100000)]
+df_train = df_esports[df_esports.match_date < datetime(2018, 8, 8, 0, 46, 43, 100000)]
+
+
+### OPTIONS
+dict_training_option = {'e sports':{
+                                'mod_value':       0.1,
+                                'limit_bet':       0,
+                                'limit_DC':        0.01,
+                                'limit_perf_min':  0,
+                                'force_mode':      '',
+                                 }}
+
+### TRAINING
+dict_parameter_sport, df_parameter_esports = optimisation_7(df_train, dict_training_option)
+dict_parameter.update({dict_parameter_sport.keys()[0]:dict_parameter_sport[dict_parameter_sport.keys()[0]]})
+dict_parameter['option'].update(dict_training_option)
+        
+### SAVE
+with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
+    json.dump(dict_parameter, outfile)
+    
+ee
+# =============================================================================
 # hockey
 # =============================================================================
 ### LOAD DATA
@@ -189,7 +250,7 @@ df_train = df_hockey[df_hockey.match_date < datetime(2019, 8, 8, 0, 46, 43, 1000
 ### OPTIONS
 dict_training_option = {'hockey':{
                                 'mod_value':       0.1,
-                                'limit_bet':       0,
+                                'limit_bet':       2.35,
                                 'limit_DC':        0.02,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',

@@ -561,10 +561,11 @@ def optimisation_7(df_train, dict_training_option):
                     
                     if bet_X != 0:
                         bet_DNB = (1-(1/bet_X))*min_bet
+                        bet_DC  = 1/((1/min_bet)+(1/bet_X))
                     else:
                         bet_DNB = 0
+                        bet_DC  = 0
                     bet_WNB = (1-(1/min_bet))*bet_X
-                    bet_DC  = 1/((1/min_bet)+(1/bet_X))
 
                     ### S
                     if df_train_mod.good_pred.iloc[item] == 1:
@@ -581,7 +582,7 @@ def optimisation_7(df_train, dict_training_option):
                     
                     ### DNB
                     if df_train_mod.good_pred.iloc[item] == 1:
-                        S1 = (1-(1/bet_X))*1
+#                        S1 = (1-(1/bet_X))*1
                         result_DNB = result_DNB + bet_DNB*1 -1
                     else:
                         if df_train_mod.good_pred_draw.iloc[item] == 1:
@@ -591,7 +592,7 @@ def optimisation_7(df_train, dict_training_option):
                     
                     ### WNB
                     if df_train_mod.good_pred_draw.iloc[item] == 1:
-                        SX = (1-(1/min_bet))*1
+#                        SX = (1-(1/min_bet))*1
                         result_WNB = result_WNB + bet_WNB*1 -1
                     else:
                         if df_train_mod.good_pred.iloc[item] == 1:
@@ -698,8 +699,9 @@ def optimisation_7_apply(df_test, dict_parameter_sport):
     
                 for i, mod in enumerate(list_mode_test):
 #                    ee
+#                    print sport, mod[0], mod[1]
                     diff_bet            = list_diff_bet[i]                    
-                    df_mod              = df_test_sport[(df_test_sport.min_bet > mod[0]) & (df_test_sport.min_bet <= mod[1])]
+                    df_mod              = df_test_sport[(df_test_sport.min_bet > mod[0]) & (df_test_sport.min_bet < mod[1])]
                     df_mod              = df_mod[df_mod.bet_diff >= diff_bet]
                     mode_bet            = list_mode_bet[i]
                     df_mod['mode_bet']  = mode_bet

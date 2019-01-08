@@ -86,9 +86,10 @@ df_merge_single_modif       = df_merge_single.copy()
 df_parameter_sport          = pd.DataFrame()
 
 
-#######
-df_single = df_single[((df_single.sport == 'hockey') & (df_single.bet_X != 0)) | (df_single.sport == 'soccer')]
-df_single.dropna(inplace=True)
+########
+#df_single = df_single[((df_single.sport == 'hockey') & (df_single.bet_X != 0)) | (df_single.sport == 'soccer')]
+#df_single.dropna(inplace=True)
+########
 
 for day_shift in list_day_shift:
 #    mise       = bankroll*3/100
@@ -111,6 +112,11 @@ for day_shift in list_day_shift:
     print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')    
     with open('../model/local/dict_parameter_sport.json') as json_file:  
         dict_parameter_sport = json.load(json_file)
+    
+    """
+    df_test = df_single.copy()
+    df_test = df_single[df_single.sport == 'esports']
+    """
     df_single_filter = optimisation_7_apply(df_test, dict_parameter_sport)
 #        df_parameter_sport = pd.concat((df_parameter_sport, df_parameter_sport_temp))
 
@@ -290,10 +296,10 @@ for day_shift in list_day_shift:
         list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
         for sport in list_sport_win_loss:
             total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
-            print sport.ljust(13), ' : ', ' total : ', total, ' perc : ' , round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%', '==>', round(dict_result_sport[sport]['result'],2), 'euros'
-#            list_mod_win_loss = list(set(df_win[u'mod'].unique().tolist()+df_loss[u'mod'].unique().tolist()))
-#            for mod in list_mod_win_loss:
-#                print '       : ', round(100*len(df_win[df_win[u'mod'] == mod])/float(len(df_win[df_win[u'mod'] == mod])+len(df_loss[df_loss[u'mod'] == mod])),2),'%', '==>', mod
+            print sport.ljust(13), ':', 'total : ', total, ' perc : ' , round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%', '==>', round(dict_result_sport[sport]['result'],2), 'euros'
+            list_mod_win_loss = list(set(df_win[u'mod'][df_win.sport == sport].unique().tolist()+df_loss[u'mod'][df_loss.sport == sport].unique().tolist()))
+            for mod in list_mod_win_loss:
+                print '        ==> ', len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport]), ' : ',  round(100*len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])/float(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])),2),'%', '==>', round(mod*0.1,1), '/', round((mod+1)*0.1,1)
     except:
         pass
     print '******************************************'

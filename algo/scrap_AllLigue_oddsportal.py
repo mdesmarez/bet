@@ -124,7 +124,8 @@ list_sport = [\
 #              'volleyball', 
 #              'tennis',
 #              'handball',
-              'hockey',              
+#              'hockey',  
+              'esports',  
               ]
 
 
