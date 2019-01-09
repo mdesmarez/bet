@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <style>
+            table {
+                border-collapse: collapse;
+                border: 2px black solid;
+                font: 12px sans-serif;
+            }
+
+            td {
+                border: 1px black solid;
+                padding: 5px;
+            }
+        </style>
+	<script src="http://d3js.org/d3.v3.min.js"></script>
+	<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+    </head>
+        <meta http-equiv="Refresh" content="3600; url=bet_dashboard.html">
+    <body>
+
+	<div id="list">
+	  <p><iframe src="./dataset/local/dashbord.txt" frameborder="0" height="1000"
+	      width="1000"></iframe></p>
+	</div>
+
+	<BR><BR><BR>
+	History
+	<div id="chartContainer">
+		<script type="text/javascript">
+			var svg = dimple.newSvg("#chartContainer",850,600);//creating a SVG with given size
+			d3.csv("./dataset/local/result_soccer.csv",function(data)// function called when athlets.csv is done loading
+			{
+				console.log("done loading");
+				console.log(data)				
+				var chart = new dimple.chart(svg,data); // getting a Chart instance to draw on
+				var myAxis_X = chart.addTimeAxis("x","date_day","%Y %m %d %H","%d/%m %HH"); // setting the x axis to show the sports 2017-12-06 16:09:00
+				var myAxis_Y = chart.addMeasureAxis("y","result"); // setting the y axis to show the no. of golds own
+				myAxis_Y.tickFormat = ',.0f';
+				chart.addSeries(null,dimple.plot.line); // plotting, with nationality as series.
+				chart.draw();
+			});
+		</script>
+	</div>
+
+
+    </body>
+</html>

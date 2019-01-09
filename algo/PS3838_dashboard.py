@@ -306,11 +306,19 @@ def dashboard(dict_parameter_sport, GMT_to_add):
                 df_win['mod'] = df_win['mod'].apply(lambda x: int(x))
                 df_loss['mod'] = df_loss.min_bet/dict_parameter_sport['option'][sport]['mod_value']
                 df_loss['mod'] = df_loss['mod'].apply(lambda x: int(x))
+                
+                
+                df_win['gain'] = 0
+                df_win.gain[df_win.mode_bet == 'S'] = (df_win.min_bet[df_win.mode_bet == 'S']-1) * mise
+                df_win.gain[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)] = (df_win.bet_X[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]*(1-(1/df_win.min_bet[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]))-1) * mise
+                df_loss['gain'] = -mise
+                
                 total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
-                print sport, '==> ', total, '-', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%'
+                total_gain = str(int(df_win[df_win.sport == sport]['gain'].sum() + df_loss[df_loss.sport == sport]['gain'].sum()))
+                print sport, '=> ', total.rjust(4), 'bet /', total_gain.rjust(4), 'euros /', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%'
                 list_mod_win_loss = list(set(df_win[u'mod'][df_win.sport == sport].unique().tolist()+df_loss[u'mod'][df_loss.sport == sport].unique().tolist()))
                 for mod in list_mod_win_loss:
-                    print '                   ==> ', str(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])).rjust(4), '-',  round(100*len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])/float(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])),1),'%', '==>', round(mod*0.1,1), '/', round((mod+1)*0.1,1)
+                    print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '=>', str(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])).rjust(4), 'bet /', str(int(sum(df_win['gain'][df_win[u'mod'] == mod])+sum(df_loss['gain'][df_loss[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])/float(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])),1),'%'
         except:
             pass
         
@@ -326,6 +334,12 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         print('********       OPTIONS      **********')
         print(json.dumps(dict_parameter_sport, indent=4, sort_keys=True))
         print('*************************************')
+        
+        aa = pd.concat((df_win,df_loss))
+        aa['date_day'] = aa.match_date.apply(lambda x: x.strftime("%Y %m %d %H"))
+        aaa = pd.DataFrame(aa.groupby('date_day').gain.sum())
+        aaa['result'] = aaa.gain.cumsum()
+        aaa.to_csv('../dataset/local/result_soccer.csv')
     except:
         pass
     
