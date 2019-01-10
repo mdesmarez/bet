@@ -20,8 +20,10 @@
         <meta http-equiv="Refresh" content="3600; url=bet_dashboard.html">
     <body>
 
+	<a target="_blank" href="https://www.sofascore.com/fr/football/livescore">SofaScore</a>
+	
 	<div id="list">
-	  <p><iframe src="./dataset/local/dashbord.txt" frameborder="0" height="1000"
+	  <p><iframe src="./dataset/local/dashbord.txt" frameborder="0" height=2300
 	      width="1000"></iframe></p>
 	</div>
 
@@ -29,13 +31,13 @@
 	History
 	<div id="chartContainer">
 		<script type="text/javascript">
-			var svg = dimple.newSvg("#chartContainer",850,600);//creating a SVG with given size
+			var svg = dimple.newSvg("#chartContainer",1000,500);//creating a SVG with given size
 			d3.csv("./dataset/local/result_soccer.csv",function(data)// function called when athlets.csv is done loading
 			{
 				console.log("done loading");
 				console.log(data)				
 				var chart = new dimple.chart(svg,data); // getting a Chart instance to draw on
-				var myAxis_X = chart.addTimeAxis("x","date_day","%Y %m %d %H","%d/%m %HH"); // setting the x axis to show the sports 2017-12-06 16:09:00
+				var myAxis_X = chart.addTimeAxis("x","date_day","%Y %m %d %H","%a %d/%m %HH"); // setting the x axis to show the sports 2017-12-06 16:09:00
 				var myAxis_Y = chart.addMeasureAxis("y","result"); // setting the y axis to show the no. of golds own
 				myAxis_Y.tickFormat = ',.0f';
 				chart.addSeries(null,dimple.plot.line); // plotting, with nationality as series.

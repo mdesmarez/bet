@@ -202,7 +202,7 @@ async function Oddsportal_scrap(invisible_nav) {
         await waitFor(500);
         clickByXPATH(page, '//*[@id="betslip-content"]/div/form/div[7]/div/input');
         await waitFor(1000);
-        //clickByXPATH(page, '//*[@id="euro-sports"]/div[4]/div[3]/div/button[1]/span');
+        clickByXPATH(page, '//*[@id="euro-sports"]/div[4]/div[3]/div/button[1]/span');
         await waitFor(100);
       });
       console.log('Done');

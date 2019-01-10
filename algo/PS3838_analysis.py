@@ -109,8 +109,8 @@ for day_shift in list_day_shift:
 
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
 
-#    if date_text.strftime("%w") in ['0','5','6']:
-    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
+    if date_text.strftime("%w") in ['0','5','6']:
+#    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
         
         print '\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
         print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'

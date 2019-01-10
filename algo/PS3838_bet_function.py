@@ -60,7 +60,7 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     df_futur_bet.drop_duplicates(subset=['match_date','team_home'], inplace=True)
     df_futur_bet.to_csv('../dataset/local/df_futur_bet.xls', encoding='utf-8')
     
-    limit_before_bet = 100000000
+    limit_before_bet = 10
     df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=limit_before_bet)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
 
@@ -128,6 +128,14 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
                     stake_to_bet                      = str(df_betting_single_S.stake.tolist())[1:-1].replace('u','').replace("'","")
                     print df_betting_single_S
                     os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id + '" "' + sport_to_bet + '" "' + stake_to_bet + '"')
+        
+                try:
+                    df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/TRUE_df_real_betting_single.xls', encoding='utf-8')
+                except:
+                    df_real_betting_single_done = pd.DataFrame()
+                df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single_S_all))
+                df_real_betting_single_done.to_csv('../dataset/local/TRUE_df_real_betting_single.xls', encoding='utf-8')
+        
     
             
             ###
@@ -146,7 +154,14 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
             
                     os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id_1 + '" "' + sport_to_bet_1 + '" "' + stake_to_bet_1 + '"')
                     os.system('node ps3838_place_bet_single_standalone.js "' + team_to_bet_id_X + '" "' + sport_to_bet_1 + '" "' + stake_to_bet_X + '"')
-    
+
+                try:
+                    df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/TRUE_df_real_betting_single.xls', encoding='utf-8')
+                except:
+                    df_real_betting_single_done = pd.DataFrame()
+                df_real_betting_single_done = pd.concat((df_real_betting_single_done, df_betting_single_WNB_all))
+                df_real_betting_single_done.to_csv('../dataset/local/TRUE_df_real_betting_single.xls', encoding='utf-8')    
+
         
         try:
             df_real_betting_single_done = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
