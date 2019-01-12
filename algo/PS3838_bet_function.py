@@ -60,7 +60,7 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
     df_futur_bet.drop_duplicates(subset=['match_date','team_home'], inplace=True)
     df_futur_bet.to_csv('../dataset/local/df_futur_bet.xls', encoding='utf-8')
     
-    limit_before_bet = 10
+    limit_before_bet = 15
     df_single_filter             = df_single_filter[(df_single_filter.match_date < datetime.now()+timedelta(hours=GMT_to_add)+timedelta(minutes=limit_before_bet)) & (df_single_filter.match_date > datetime.now()+timedelta(hours=GMT_to_add))]
     df_single_filter.drop_duplicates(subset=['match_date','team_home'], inplace=True)
 
@@ -143,8 +143,8 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
             if len(df_betting_single_WNB_all) != 0:
                 for i in range(len(df_betting_single_WNB_all)):
                     df_betting_single_WNB               = pd.DataFrame(df_betting_single_WNB_all.iloc[i]).T
-                    df_betting_single_WNB['stake_1']  = df_betting_single_WNB.min_bet.apply(lambda x: round((1-1/x)*stake,2))
-                    df_betting_single_WNB['stake_X']  = df_betting_single_WNB.min_bet.apply(lambda x: round(stake/float(x),2))
+                    df_betting_single_WNB['stake_X']  = df_betting_single_WNB.min_bet.apply(lambda x: round((1-1/x)*stake,2))
+                    df_betting_single_WNB['stake_1']  = df_betting_single_WNB.min_bet.apply(lambda x: round(stake/float(x),2))
             
                     team_to_bet_id_1                  = str(df_betting_single_WNB.team_to_bet_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')
                     team_to_bet_id_X                  = str(df_betting_single_WNB.team_X_id.tolist())[1:-1].replace('u','').replace("'","").replace(' ','')

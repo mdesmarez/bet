@@ -109,8 +109,8 @@ for day_shift in list_day_shift:
 
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
 
-    if date_text.strftime("%w") in ['0','5','6']:
-#    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
+#    if date_text.strftime("%w") in ['0','5','6']:
+    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
         
         print '\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
         print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
@@ -373,11 +373,16 @@ os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_real_bett
 os.system('mv df_real_betting_single.xls df_real_betting_single_serveur.xls')
 os.system('mv df_real_betting_single_serveur.xls ../dataset/local/df_real_betting_single_serveur.xls')
 
+os.system('wget http://35.195.3.155:8080/bet/prod/bet/dataset/local/df_futur_bet.xls')
+os.system('mv df_futur_bet.xls df_futur_bet_serveur.xls')
+os.system('mv df_futur_bet_serveur.xls ../dataset/local/df_futur_bet_serveur.xls')
 
-df_single_server = pd.DataFrame.from_csv('../dataset/local/df_single_server.xls', encoding='utf-8')
-df_parlay_server = pd.DataFrame.from_csv('../dataset/local/df_parlay_server.xls', encoding='utf-8')
-df_result_server = pd.DataFrame.from_csv('../dataset/local/df_result_server.xls', encoding='utf-8')
-df_real_betting_single_serveur = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single_serveur.xls', encoding='utf-8')
+df_single_server                = pd.DataFrame.from_csv('../dataset/local/df_single_server.xls', encoding='utf-8')
+df_parlay_server                = pd.DataFrame.from_csv('../dataset/local/df_parlay_server.xls', encoding='utf-8')
+df_result_server                = pd.DataFrame.from_csv('../dataset/local/df_result_server.xls', encoding='utf-8')
+df_futur_bet_serveur            = pd.DataFrame.from_csv('../dataset/local/df_futur_bet_serveur.xls', encoding='utf-8')
+df_real_betting_single_serveur  = pd.DataFrame.from_csv('../dataset/local/df_real_betting_single_serveur.xls', encoding='utf-8')
+
 
 df_single = pd.DataFrame.from_csv('../dataset/local/df_single.xls', encoding='utf-8')
 df_parlay = pd.DataFrame.from_csv('../dataset/local/df_parlay.xls', encoding='utf-8')
@@ -388,12 +393,14 @@ df_real_betting_single = pd.DataFrame.from_csv('../dataset/local/df_real_betting
 df_result               = df_result_server.copy()
 df_single               = df_single_server.copy()
 df_result               = df_result_server.copy()
+df_futur_bet            = df_futur_bet_serveur.copy()
 df_real_betting_single  = df_real_betting_single_serveur.copy()
 
 
 df_result.to_csv('../dataset/local/df_result.xls', encoding='utf-8')
 df_parlay.to_csv('../dataset/local/df_parlay.xls', encoding='utf-8')
 df_single.to_csv('../dataset/local/df_single.xls', encoding='utf-8')
+df_futur_bet.to_csv('../dataset/local/df_futur_bet.xls', encoding='utf-8')
 df_real_betting_single.to_csv('../dataset/local/df_real_betting_single.xls', encoding='utf-8')
 """
 

@@ -18,33 +18,150 @@
 	<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
     </head>
         <meta http-equiv="Refresh" content="3600; url=bet_dashboard.html">
-    <body>
+    <body style="width: 100%; background-color: #f1f1f1">
 
-	<a target="_blank" href="https://www.sofascore.com/fr/football/livescore">SofaScore</a>
-	
+	<!-- SOFASCORE -->
+	<a target="_blank" href="https://www.sofascore.com/fr/football/livescore"><h2>SofaScore</h2></a>
+	<div id="sofascore_link" style="width: 100%" ></div>
+
+	<!-- BET ON GOING -->
+	<div id="array" style="width: 100%">
+		<br><a href="./dataset/local/dashboard_bet_ongoing.csv"><h2>Bet On Going</h2></a>
+			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+			<script src="d3.min.js?v=3.2.8"></script>
+			<script type="text/javascript"charset="utf-8">
+				d3.text("./dataset/local/dashboard_bet_ongoing.csv", function(data) {
+					var limit = 100;
+					var parsedCSV = d3.csv.parseRows(data);
+					if (parsedCSV.length < limit) {
+									limit = parsedCSV.length-1;
+									}
+					var parsedCSVlimit = [];
+					parsedCSVlimit.push(parsedCSV['0']);
+					
+					var sofa = "";
+					var sofa_href = "";
+					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 
+						sofa_href = 'https://www.sofascore.com/fr/recherche?q='+parsedCSV[i][2];
+						sofa = "<a target='_blank' href=" + sofa_href + "><font size='2'>" + parsedCSV[i][2] + "</font></a><br>";
+						console.log(document.getElementById("sofascore_link").innerHTML);
+						document.getElementById("sofascore_link").innerHTML = document.getElementById("sofascore_link").innerHTML + sofa
+						parsedCSVlimit.push(parsedCSV[i]);
+					}
+		
+		document.title = parseInt(parsedCSV.length-1) + ' on';
+/* 		console.log(parsedCSV.length);
+		console.log(parsedCSV);
+		console.log(parsedCSVlimit); */	
+		parsedCSV = parsedCSVlimit
+		var container = d3.select("#array")
+			.append("table")
+				.attr('width','100%')
+			.selectAll("tr")
+				.data(parsedCSV).enter()
+				.append("tr")
+			.selectAll("td")
+				.data(function(d) { return d; }).enter()				
+				.append("td")
+				.text(function(d) { return d; });
+				});
+			</script>
+	</div>
+
+	<!-- RESULT -->
+	<div id="array_result" style="width: 100%">
+		<br><a href="./dataset/local/dashboard_results.csv"><h2>Results</h2></a>
+			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+			<script src="d3.min.js?v=3.2.8"></script>
+			<script type="text/javascript"charset="utf-8">
+				d3.text("./dataset/local/dashboard_results.csv", function(data) {
+					var limit = 10;
+					var parsedCSV = d3.csv.parseRows(data);
+					if (parsedCSV.length < limit) {
+									limit = parsedCSV.length-1;
+									}
+					var parsedCSVlimit = [];
+					parsedCSVlimit.push(parsedCSV['0']);
+
+					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 						
+						parsedCSVlimit.push(parsedCSV[i]);
+					}
+		
+		parsedCSV = parsedCSVlimit;
+		var container = d3.select("#array_result")
+			.append("table")
+				.attr('width','100%')
+			.selectAll("tr")
+				.data(parsedCSV).enter()
+				.append("tr")
+			.selectAll("td")
+				.data(function(d) { return d; }).enter()				
+				.append("td")
+				.text(function(d) { return d; });
+				});
+			</script>
+	</div>
+
+	<!-- FUTURE -->
+	<div id="array_future" style="width: 100%">
+		<br><a href="./dataset/local/dashboard_bet_futur.csv"><h2>Future</h2></a>
+			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+			<script src="d3.min.js?v=3.2.8"></script>
+			<script type="text/javascript"charset="utf-8">
+				d3.text("./dataset/local/dashboard_bet_futur.csv", function(data) {
+					var limit = 100;
+					var parsedCSV = d3.csv.parseRows(data);
+					if (parsedCSV.length < limit) {
+									limit = parsedCSV.length-1;
+									}
+					var parsedCSVlimit = [];
+					parsedCSVlimit.push(parsedCSV['0']);
+
+					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 						
+						parsedCSVlimit.push(parsedCSV[i]);
+					}
+		
+		parsedCSV = parsedCSVlimit;
+		var container = d3.select("#array_future")
+			.append("table")
+				.attr('width','100%')
+			.selectAll("tr")
+				.data(parsedCSV).enter()
+				.append("tr")
+			.selectAll("td")
+				.data(function(d) { return d; }).enter()				
+				.append("td")
+				.text(function(d) { return d; });
+				});
+			</script>
+	</div>
+
+
+		<div id="chartContainer">
+			<h2>History</h2>
+			<script type="text/javascript" style="width: 100%">
+				var svg = dimple.newSvg("#chartContainer",1000,500);//creating a SVG with given size
+				d3.csv("./dataset/local/result_soccer.csv",function(data)// function called when athlets.csv is done loading
+				{
+					console.log("done loading");
+					console.log(data)				
+					var chart = new dimple.chart(svg,data); // getting a Chart instance to draw on
+					var myAxis_X = chart.addTimeAxis("x","date_day","%Y %m %d %H","%a %d/%m %HH"); // setting the x axis to show the sports 2017-12-06 16:09:00
+					var myAxis_Y = chart.addMeasureAxis("y","result"); // setting the y axis to show the no. of golds own
+					myAxis_Y.tickFormat = ',.0f';
+					chart.addSeries(null,dimple.plot.line); // plotting, with nationality as series.
+					chart.draw();
+				});
+			</script>
+		</div>
+
+
 	<div id="list">
 	  <p><iframe src="./dataset/local/dashbord.txt" frameborder="0" height=2300
 	      width="1000"></iframe></p>
 	</div>
 
-	<BR><BR><BR>
-	History
-	<div id="chartContainer">
-		<script type="text/javascript">
-			var svg = dimple.newSvg("#chartContainer",1000,500);//creating a SVG with given size
-			d3.csv("./dataset/local/result_soccer.csv",function(data)// function called when athlets.csv is done loading
-			{
-				console.log("done loading");
-				console.log(data)				
-				var chart = new dimple.chart(svg,data); // getting a Chart instance to draw on
-				var myAxis_X = chart.addTimeAxis("x","date_day","%Y %m %d %H","%a %d/%m %HH"); // setting the x axis to show the sports 2017-12-06 16:09:00
-				var myAxis_Y = chart.addMeasureAxis("y","result"); // setting the y axis to show the no. of golds own
-				myAxis_Y.tickFormat = ',.0f';
-				chart.addSeries(null,dimple.plot.line); // plotting, with nationality as series.
-				chart.draw();
-			});
-		</script>
-	</div>
+
 
 
     </body>

@@ -249,6 +249,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_futur_bet = df_futur_bet[['sport', 'team_home', 'mode_bet', 'min_bet']]
     df_futur_bet.columns = ['sport', 'team home', 'mode', 'bet']
     df_futur_bet.sort_index(ascending=True, inplace=True)
+    df_futur_bet.to_csv('../dataset/local/dashboard_bet_futur.csv')
 
     
     ###
@@ -258,7 +259,8 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_single_ongoing.set_index('match_date', drop=True, inplace=True)
     df_single_ongoing = df_single_ongoing[['sport', 'team_to_bet', 'mode_bet', 'min_bet']]
     df_single_ongoing.columns = ['sport', 'team to bet', 'mode', 'bet']
-    
+    df_single_ongoing.to_csv('../dataset/local/dashboard_bet_ongoing.csv')
+
     ###
     df_merge_single_bet_view = df_merge_single_bet.copy()
     
@@ -269,6 +271,7 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_merge_single_bet_view.set_index('match_date', drop=True, inplace=True)
     df_merge_single_bet_view = df_merge_single_bet_view[['sport', 'team_home', 'mode_bet', 'good_pred']]
     df_merge_single_bet_view.columns = ['sport', 'team home', 'mode', 'good']
+    df_merge_single_bet_view.to_csv('../dataset/local/dashboard_results.csv')
 
     
     orig_stdout = sys.stdout
