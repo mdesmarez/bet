@@ -17,15 +17,56 @@
 	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
     </head>
-        <meta http-equiv="Refresh" content="3600; url=bet_dashboard.html">
+        <meta http-equiv="Refresh" content="600; url=bet_dashboard.html">
     <body style="width: 100%; background-color: #f1f1f1">
 
 	<!-- SOFASCORE -->
 	<a target="_blank" href="https://www.sofascore.com/fr/football/livescore"><h2>SofaScore</h2></a>
 	<div id="sofascore_link" style="width: 100%" ></div>
 
+
+	<!-- STATUS -->
+	<div id="array_status" style="width: 50%">
+			<br><a href="./dataset/local/dashboard_status.csv"><h2>Status</h2></a>
+				<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+				<script src="d3.min.js?v=3.2.8"></script>
+				<script type="text/javascript"charset="utf-8">
+					d3.text("./dataset/local/dashboard_status.csv", function(data) {
+						var limit = 100;
+						var parsedCSV = d3.csv.parseRows(data);
+						if (parsedCSV.length < limit) {
+										limit = parsedCSV.length-1;
+										}
+						var parsedCSVlimit = [];
+						parsedCSVlimit.push(parsedCSV['0']);
+						for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 
+						
+						parsedCSVlimit.push(parsedCSV[i]);
+					}
+			
+			document.title = parsedCSV[2][1];
+	 		console.log(parsedCSV[2][1]);
+	/*		console.log(parsedCSV);
+			console.log(parsedCSVlimit); */	
+			parsedCSV = parsedCSVlimit
+			var container = d3.select("#array_status")
+				.append("table")
+					.attr('width','100%')
+				.selectAll("tr")
+					.data(parsedCSV).enter()
+					.append("tr")
+				.selectAll("td")
+					.data(function(d) { return d; }).enter()				
+					.append("td")
+					.text(function(d) { return d; })
+						.style('font-size','20px');
+					});
+				</script>
+		</div>
+
+
 	<!-- BET ON GOING -->
-	<div id="array" style="width: 100%">
+	<div id="array" style="width: 80%">
 		<br><a href="./dataset/local/dashboard_bet_ongoing.csv"><h2>Bet On Going</h2></a>
 			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
 			<script src="d3.min.js?v=3.2.8"></script>
@@ -42,14 +83,18 @@
 					var sofa = "";
 					var sofa_href = "";
 					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 
-						sofa_href = 'https://www.sofascore.com/fr/recherche?q='+parsedCSV[i][2];
+						var link = parsedCSV[i][2]
+						link = link.replace(' ', '%20');
+						sofa_href = 'https://www.sofascore.com/fr/recherche?q='+link;
+						console.log(link);
+						console.log(sofa_href);
 						sofa = "<a target='_blank' href=" + sofa_href + "><font size='2'>" + parsedCSV[i][2] + "</font></a><br>";
 						console.log(document.getElementById("sofascore_link").innerHTML);
 						document.getElementById("sofascore_link").innerHTML = document.getElementById("sofascore_link").innerHTML + sofa
 						parsedCSVlimit.push(parsedCSV[i]);
 					}
 		
-		document.title = parseInt(parsedCSV.length-1) + ' on';
+		document.title = document.title + ' / ' + parseInt(parsedCSV.length-1) + ' on';
 /* 		console.log(parsedCSV.length);
 		console.log(parsedCSV);
 		console.log(parsedCSVlimit); */	
@@ -63,47 +108,14 @@
 			.selectAll("td")
 				.data(function(d) { return d; }).enter()				
 				.append("td")
-				.text(function(d) { return d; });
-				});
-			</script>
-	</div>
-
-	<!-- RESULT -->
-	<div id="array_result" style="width: 100%">
-		<br><a href="./dataset/local/dashboard_results.csv"><h2>Results</h2></a>
-			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
-			<script src="d3.min.js?v=3.2.8"></script>
-			<script type="text/javascript"charset="utf-8">
-				d3.text("./dataset/local/dashboard_results.csv", function(data) {
-					var limit = 10;
-					var parsedCSV = d3.csv.parseRows(data);
-					if (parsedCSV.length < limit) {
-									limit = parsedCSV.length-1;
-									}
-					var parsedCSVlimit = [];
-					parsedCSVlimit.push(parsedCSV['0']);
-
-					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 						
-						parsedCSVlimit.push(parsedCSV[i]);
-					}
-		
-		parsedCSV = parsedCSVlimit;
-		var container = d3.select("#array_result")
-			.append("table")
-				.attr('width','100%')
-			.selectAll("tr")
-				.data(parsedCSV).enter()
-				.append("tr")
-			.selectAll("td")
-				.data(function(d) { return d; }).enter()				
-				.append("td")
-				.text(function(d) { return d; });
+				.text(function(d) { return d; })
+					.style('font-size','20px');
 				});
 			</script>
 	</div>
 
 	<!-- FUTURE -->
-	<div id="array_future" style="width: 100%">
+	<div id="array_future" style="width: 80%">
 		<br><a href="./dataset/local/dashboard_bet_futur.csv"><h2>Future</h2></a>
 			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
 			<script src="d3.min.js?v=3.2.8"></script>
@@ -129,12 +141,56 @@
 				.data(parsedCSV).enter()
 				.append("tr")
 			.selectAll("td")
-				.data(function(d) { return d; }).enter()				
+				.data(function(d) { return d; }).enter()	
 				.append("td")
-				.text(function(d) { return d; });
+				.text(function(d) { return d; })
+					.style('font-size','20px');
 				});
 			</script>
 	</div>
+
+
+
+	
+	<!-- RESULT -->
+	<div id="array_result" style="width: 80%">
+		<br><a href="./dataset/local/dashboard_results.csv"><h2>Results</h2></a>
+			<script type="text/javascript" src="http://mbostock.github.com/d3/d3.js"></script>
+			<script src="d3.min.js?v=3.2.8"></script>
+			<script type="text/javascript"charset="utf-8">
+				d3.text("./dataset/local/dashboard_results.csv", function(data) {
+					var limit = 30;
+					var parsedCSV = d3.csv.parseRows(data);
+					if (parsedCSV.length < limit) {
+									limit = parsedCSV.length-1;
+									}
+					var parsedCSVlimit = [];
+					parsedCSVlimit.push(parsedCSV['0']);
+
+					for (i = parsedCSV.length-1; i > parsedCSV.length-1-limit; i--) { 						
+						parsedCSVlimit.push(parsedCSV[i]);
+					}
+		
+		parsedCSV = parsedCSVlimit;
+		var container = d3.select("#array_result")
+			.append("table")
+				.attr('width','100%')
+			.selectAll("tr")
+				.data(parsedCSV).enter()
+				.append("tr")
+			.selectAll("td")
+				.data(function(d) { return d; }).enter()				
+				.append("td")
+				.text(function(d) { return d; })
+					.style('font-size','20px');
+				});
+			</script>
+	</div>
+
+
+
+		
+
 
 
 		<div id="chartContainer">
@@ -163,6 +219,20 @@
 
 
 
+	<script src="http://code.jquery.com/jquery-1.7.2.min.js" language="javascript"></script>
+    <script language="javascript">
+		$(window).load(function () {
+			$("td:contains(1)").css({'background-color':'green'});
+			$("td:contains(0)").css({'background-color':'red'});
+			$("td:contains('-')").css({'background-color':'blue'});
+			$("td:contains('WNB')").css({'background-color':'white'});
+			$("td:contains(2)").css({'background-color':'white'});
+			$("td:contains('_')").css({'background-color':'white'});
+
+		});
+		
+
+	</script>
 
     </body>
 </html>

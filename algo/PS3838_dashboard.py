@@ -23,6 +23,8 @@ from tabulate                                                                  i
 from PS3838_scrap_function                                                     import ps3838_scrap_parlay, ps3838_scrap_single, ps3838_scrap_result
 from PS3838_support_function                                                   import encode_decode, match_filter_prediction
 
+from bs4                                                                       import BeautifulSoup
+
 
 def dashboard(dict_parameter_sport, GMT_to_add):
     # =============================================================================
@@ -244,11 +246,12 @@ def dashboard(dict_parameter_sport, GMT_to_add):
 #                    else:
 #                        num_bad_pred = num_bad_pred + 1
     
+
     ###
     df_futur_bet.set_index('match_date', drop=True, inplace=True)
     df_futur_bet = df_futur_bet[['sport', 'team_home', 'mode_bet', 'min_bet']]
     df_futur_bet.columns = ['sport', 'team home', 'mode', 'bet']
-    df_futur_bet.sort_index(ascending=True, inplace=True)
+    df_futur_bet.sort_index(ascending=False, inplace=True)
     df_futur_bet.to_csv('../dataset/local/dashboard_bet_futur.csv')
 
     
@@ -258,8 +261,8 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     df_single_ongoing = df_single_ongoing[df_single_ongoing.match_date >  date_min]
     df_single_ongoing.set_index('match_date', drop=True, inplace=True)
     df_single_ongoing = df_single_ongoing[['sport', 'team_to_bet', 'mode_bet', 'min_bet']]
-    df_single_ongoing.columns = ['sport', 'team to bet', 'mode', 'bet']
-    df_single_ongoing.to_csv('../dataset/local/dashboard_bet_ongoing.csv')
+    df_single_ongoing.columns = ['sport', 'team to bet', u'mode', 'bet']
+    df_single_ongoing.to_csv('../dataset/local/dashboard_bet_ongoing.csv', encoding='utf-8')
 
     ###
     df_merge_single_bet_view = df_merge_single_bet.copy()
@@ -269,11 +272,37 @@ def dashboard(dict_parameter_sport, GMT_to_add):
     
     
     df_merge_single_bet_view.set_index('match_date', drop=True, inplace=True)
-    df_merge_single_bet_view = df_merge_single_bet_view[['sport', 'team_home', 'mode_bet', 'good_pred']]
-    df_merge_single_bet_view.columns = ['sport', 'team home', 'mode', 'good']
-    df_merge_single_bet_view.to_csv('../dataset/local/dashboard_results.csv')
+    df_merge_single_bet_view = df_merge_single_bet_view[['sport', 'team_home', 'mode_bet', 'min_bet', 'good_pred']]
+    df_merge_single_bet_view.columns = ['sport', 'team home', 'mode', 'bet', 'good']
+    df_merge_single_bet_view.sort_index(ascending=True, inplace=True)
+    df_merge_single_bet_view.to_csv('../dataset/local/dashboard_results.csv', encoding='utf-8')
 
     
+    ###
+    try:
+        soup                = BeautifulSoup(open('../dataset/local/PS3838.html'), "html.parser")
+        PS_money_ongoing    = soup.find('span', { "id" : "account-balance"}).text
+        dict_status         = {
+                                '0_Heure            ':str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S')),
+                                '1_Cave             ':str(PS_money_ongoing).replace(' ','_'),
+                                '2_Nbr total bet    ':str(total_nbr_bet)+'_',
+                                }    
+        df_status           = pd.DataFrame.from_dict(dict_status, orient='index')
+        df_status.columns   = ['-']
+        df_status.sort_index(ascending=False, inplace=True)
+        df_status.to_csv('../dataset/local/dashboard_status.csv')
+    except:
+        dict_status         = {
+                                '0_Heure            ':str((datetime.now()+timedelta(hours=GMT_to_add)).strftime('%d %B %Y, %H:%M:%S')),
+                                '1_Cave             ':str('erreur'),
+                                '2_Nbr total bet    ':str(total_nbr_bet)+'_',
+                                }    
+        df_status           = pd.DataFrame.from_dict(dict_status, orient='index')
+        df_status.columns   = ['-']
+        df_status.sort_index(ascending=False, inplace=True)
+        df_status.to_csv('../dataset/local/dashboard_status.csv')
+        pass
+        
     orig_stdout = sys.stdout
     f = open('../dataset/local/dashbord.txt', 'w')
     sys.stdout = f
@@ -343,7 +372,10 @@ def dashboard(dict_parameter_sport, GMT_to_add):
         aaa = pd.DataFrame(aa.groupby('date_day').gain.sum())
         aaa['result'] = aaa.gain.cumsum()
         aaa.to_csv('../dataset/local/result_soccer.csv')
-    except:
+        
+
+    except Exception, e:
+        print e
         pass
     
     f.close()

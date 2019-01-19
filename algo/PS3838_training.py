@@ -77,11 +77,17 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 # =============================================================================
 ### LOAD DATA
 df_soccer = pd.DataFrame()
-list_soccer  = glob('../dataset/local/soccer/*.csv')
+list_soccer  = glob('../dataset/local/soccer_old/*.csv')
 for i, file_soccer in enumerate(list_soccer):
     df_soccer_temp = pd.DataFrame.from_csv(file_soccer, encoding='utf-8')
     df_soccer = pd.concat((df_soccer, df_soccer_temp))
-    
+
+df_ALL = pd.DataFrame.from_csv('../dataset/local/soccer/df_ALL_soccer.xls', encoding='utf-8')
+#df_ALL = df_merge_single.copy()
+
+df_soccer = df_ALL[df_ALL.sport == 'soccer']
+#df_soccer = pd.concat((df_soccer,df_ALL[df_ALL.sport == 'soccer']))
+  
 df_soccer['sport']       = 'soccer'
 df_soccer['bet_diff']    = df_soccer.bet_1-df_soccer.bet_2
 df_soccer['min_bet']     = 0
@@ -112,15 +118,15 @@ df_soccer.match_date = df_soccer.match_date.apply(lambda x : datetime.fromtimest
 #df_soccer = pd.concat((df_soccer,df_merge_single[df_merge_single.sport == 'soccer']))
 
 
-df_test  = df_soccer[df_soccer.match_date > datetime(2019, 8, 8, 0, 46, 43, 100000)]
-df_train = df_soccer[df_soccer.match_date < datetime(2019, 8, 8, 0, 46, 43, 100000)]
+df_test  = df_soccer[df_soccer.match_date > datetime(2018, 8, 8, 0, 46, 43, 100000)]
+df_train = df_soccer[df_soccer.match_date < datetime(2018, 8, 8, 0, 46, 43, 100000)]
 
 
 ### OPTIONS
 dict_training_option = {'soccer':{
                                 'mod_value':       0.1,
                                 'limit_bet':       2.0,
-                                'limit_DC':        0.025,
+                                'limit_DC':        0.0002,#0.025,#
                                 'limit_perf_min':  0,
                                 'force_mode':      '',
                                  }}
@@ -215,7 +221,7 @@ df_ALL = pd.DataFrame.from_csv('../dataset/local/hockey/df_ALL_hockey.xls', enco
 
 df_hockey = df_ALL[df_ALL.sport == 'hockey']
 
-#df_hockey = df_hockey[df_hockey.ligue == 'NHL']
+#df_hockey = df_merge_single[df_merge_single.sport == 'hockey']
     
 df_hockey['sport']       = 'hockey'
 df_hockey['bet_diff']    = df_hockey.bet_1-df_hockey.bet_2
@@ -224,7 +230,10 @@ df_hockey['prediction']  = 0
 df_hockey['prediction']  = 0
 df_hockey['good_pred']   = 0
 df_hockey['bad_pred']    = 0
-df_hockey['winner']      = df_hockey['result']  
+try:
+    df_hockey['winner']      = df_hockey['result']  
+except:
+    pass
 df_hockey['min_bet']     = df_hockey[['bet_1','bet_2']].min(axis=1)
 df_hockey['prediction']  = df_hockey.bet_diff.apply(lambda x : "1" if x<0 else "2")
 df_hockey['bet_diff']    = abs(df_hockey['bet_diff'])
@@ -243,14 +252,14 @@ df_hockey.bad_pred[df_hockey.good_pred != 1] = 1
 
 df_hockey.match_date = df_hockey.match_date.apply(lambda x : datetime.fromtimestamp(x))#.strftime('%Y-%m-%d %H:%M:%S'))
 
-df_test  = df_hockey[df_hockey.match_date > datetime(2019, 8, 8, 0, 46, 43, 100000)]
-df_train = df_hockey[df_hockey.match_date < datetime(2019, 8, 8, 0, 46, 43, 100000)]
+df_test  = df_hockey[df_hockey.match_date > datetime(2018, 12, 30, 0, 46, 43, 100000)]
+df_train = df_hockey[df_hockey.match_date < datetime(2018, 12, 30, 0, 46, 43, 100000)]
 
 
 ### OPTIONS
 dict_training_option = {'hockey':{
                                 'mod_value':       0.1,
-                                'limit_bet':       2.35,
+                                'limit_bet':       1.80,
                                 'limit_DC':        0.02,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',
@@ -265,6 +274,10 @@ dict_parameter['option'].update(dict_training_option)
 with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
     json.dump(dict_parameter, outfile)
     
+"""
+df = optimisation_7_apply(df_test, dict_parameter)
+"""
+
 ee
 
 # =============================================================================
@@ -303,14 +316,14 @@ df_handball.bad_pred[df_handball.good_pred != 1] = 1
 
 df_handball.match_date = df_handball.match_date.apply(lambda x : datetime.fromtimestamp(x))#.strftime('%Y-%m-%d %H:%M:%S'))
 
-df_test  = df_handball[df_handball.match_date > datetime(2019, 8, 8, 0, 46, 43, 100000)]
-df_train = df_handball[df_handball.match_date < datetime(2019, 8, 8, 0, 46, 43, 100000)]
+df_test  = df_handball[df_handball.match_date > datetime(2018, 8, 8, 0, 46, 43, 100000)]
+df_train = df_handball[df_handball.match_date < datetime(2018, 8, 8, 0, 46, 43, 100000)]
 
 
 ### OPTIONS
 dict_training_option = {'handball':{
                                 'mod_value':       0.1,
-                                'limit_bet':       2.0,
+                                'limit_bet':       1.,
                                 'limit_DC':        0.01,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',

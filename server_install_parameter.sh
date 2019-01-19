@@ -1,7 +1,7 @@
 ###########################################
 GIT_NAME="bet" 
 PYTHON_NAME1="PS3838_scrap_parlay_schedule.py"
-PYTHON_NAME2=""
+PYTHON_NAME2="scrap_AllLigue_oddsportal.py"
 PYTHON_NAME3="PS3838_import_dataset.py"
 ### without nohup
 PYTHON_NAME4="PS3838_main.py"

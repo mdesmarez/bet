@@ -91,7 +91,9 @@ async function Oddsportal_scrap(invisible_nav) {
     await page.waitFor(1 * 400);
     await page.keyboard.press('Enter');
     await page.waitFor(1 * 3000);
-    
+
+    await fs.writeFileSync('../dataset/local/PS3838.html', await page.evaluate(() => document.body.innerHTML));
+
     // 
     var list_bet = args[0].split(",") //[["soccer","918043169|0|1|0|0|0"]];
     console.log(list_bet);

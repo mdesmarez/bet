@@ -116,7 +116,8 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
         
         
         date_text = (datetime.now())
-        if date_text.strftime("%w") in ['0','5','6']:
+#        if date_text.strftime("%w") in ['0','5','6']:
+        if date_text.strftime("%w") in ['0', '1', '2', '3', '4', '5','6']:
             ###
             df_betting_single_S_all               = df_betting_single[df_betting_single.mode_bet == 'S']
             if len(df_betting_single_S_all) != 0:
@@ -182,6 +183,8 @@ def ps3838_bet_single(df_single, df_merge_single, GMT_to_add):
             print str(datetime.now()+timedelta(hours=GMT_to_add))
             print '*****************************'
     
+    os.system('node ps3838_place_bet_single_standalone.js')
+              
     return dict_parameter_sport
 
 

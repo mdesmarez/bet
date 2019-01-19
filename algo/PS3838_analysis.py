@@ -110,7 +110,8 @@ for day_shift in list_day_shift:
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
 
 #    if date_text.strftime("%w") in ['0','5','6']:
-    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
+    if date_text.strftime("%w") in ['0', '3', '4', '5','6']:
+#    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
         
         print '\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
         print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
@@ -309,7 +310,7 @@ for day_shift in list_day_shift:
                 df_win['gain'] = 0
                 df_win.gain[df_win.mode_bet == 'S'] = (df_win.min_bet[df_win.mode_bet == 'S']-1) * mise
                 df_win.gain[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)] = (df_win.bet_X[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]*(1-(1/df_win.min_bet[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]))-1) * mise
-                df_loss['gain'] = -mise
+                df_loss['gain'] = -mise 
                 
                 total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
                 total_gain = str(int(df_win[df_win.sport == sport]['gain'].sum() + df_loss[df_loss.sport == sport]['gain'].sum()))
@@ -322,7 +323,7 @@ for day_shift in list_day_shift:
         print '******************************************'
     
     
-        dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result,'result':result, 'day':date_text.strftime("%a"), 'nbr_bet':len(df_single_filter)}})
+        dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result,'result':result, 'day':date_text.strftime("%a"), 'nbr_bet':len(df_single_filter), 'ROI':round(total_result/float(total_cave)*100,2), 'ROI_day':round(result/float(cave)*100,2)}})
     
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
@@ -341,9 +342,48 @@ df_dict_result_sport.fillna(0, inplace=True)
 df_dict_result_sport['total'] = df_dict_result_sport.sum(axis=1)
 df_dict_result_sport.plot()
 
+### 
+plt.style.use('ggplot')
+df_dict_result.reset_index(drop=False, inplace=True)
+df_dict_result.columns  = [u'date_str', u'nbr_bet', u'ROI', u'result', u'ROI_day', u'total', u'day', u'line', u'ratio']
+df_dict_result['date']  = df_dict_result.date_str.apply(lambda x : datetime.strptime(x, '%Y %m %d - %a'))
+df_dict_result.set_index('date', drop=True, inplace=True)
+df_dict_result          = df_dict_result.resample('D').sum()
+df_dict_result.ROI.fillna(method='pad', inplace=True)
+df_dict_result.ROI_day.fillna(0, inplace=True)
+df_dict_result.total.fillna(method='pad', inplace=True)
+df_dict_result.result.fillna(0, inplace=True)
+df_dict_result.nbr_bet.fillna(0, inplace=True)
+
+plt.plot()
+### GLOBAL ROI IN TIME
+df_dict_result['ROI_mean_7d'] = df_dict_result.ROI.rolling(window=7).mean()
+df_dict_result['ROI_mean_14d'] = df_dict_result.ROI.rolling(window=14).mean()
+df_dict_result[['ROI','ROI_mean_7d', 'ROI_mean_14d']].plot()
+
+plt.plot()
+### GLOBAL ROI IN TIME
+df_dict_result['ROI_day_mean_7d'] = df_dict_result.ROI_day.rolling(window=7).mean()
+df_dict_result['ROI_day_mean_14d'] = df_dict_result.ROI_day.rolling(window=14).mean()
+df_dict_result['ROI_day_mean_21d'] = df_dict_result.ROI_day.rolling(window=21).mean()
+df_dict_result[['ROI_day','ROI_day_mean_7d', 'ROI_day_mean_14d', 'ROI_day_mean_21d']].plot()
+
+
+plt.plot()
+### GLOBAL NBR_BET IN TIME
+df_dict_result.nbr_bet.cumsum().plot()
+df_dict_result['nbr_bet_7d'] = df_dict_result.nbr_bet.rolling(window=7).sum()
+df_dict_result['nbr_bet_14d'] = df_dict_result.nbr_bet.rolling(window=14).sum()
+df_dict_result[['nbr_bet','nbr_bet_7d', 'nbr_bet_14d']].plot()
+
+
+
+
 print df_dict_result.groupby('day').sum()
 #del df_dict_result['total']
+del df_dict_result['total']
 df_dict_result.groupby('day').sum().plot()
+
 
 aa = pd.concat((df_win,df_loss))
 aa['date_day'] = aa.match_date.apply(lambda x: x.strftime("%Y %m %d %H"))
@@ -351,6 +391,19 @@ aaa = pd.DataFrame(aa.groupby('date_day').gain.sum())
 aaa['result'] = aaa.gain.cumsum()
 aaa.to_csv('../dataset/local/result_soccer.csv')
 
+aa = pd.concat((df_win,df_loss))
+aa['date_day'] = aa.match_date.apply(lambda x: x.strftime("%Y %m %d"))
+aaa = pd.DataFrame(aa.groupby(['date_day','mod'])['gain'].sum()).unstack()
+aaa.plot()
+aaa['total'] = aaa.sum(axis=1)
+aaa['result'] = aaa.total.cumsum()
+
+bbb = pd.DataFrame(aa.groupby(['date_day','mod'])['good_pred','good_pred_draw','bad_pred'].sum()).unstack(fill_value=0)
+ddd = (bbb['good_pred']+bbb['good_pred_draw'])/(bbb['good_pred']+bbb['good_pred_draw']+bbb['bad_pred'])
+bbb['perc'] = bbb.perc.apply(lambda x : round(x,5))
+bbb = bbb[['perc']]
+
+ccc = bbb.unstack().plot()
 
 
 """
