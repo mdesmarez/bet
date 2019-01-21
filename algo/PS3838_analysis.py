@@ -62,7 +62,7 @@ df_merge_single.match_date                = df_merge_single.match_date.apply(lam
 # =============================================================================
 # 
 # =============================================================================
-initial_bankroll            = 300
+initial_bankroll            = 500
 bankroll                    = initial_bankroll
 mise                        = 20
 min_cave                    = 0
@@ -72,7 +72,7 @@ day_shift                   = 0
 total_result                = 0
 total_cave                  = 0
 total_nbr_bet               = 0
-list_day_shift              = list(np.linspace(0,50,51))
+list_day_shift              = list(np.linspace(0,60,61))
 #list_day_shift              = [0, 1, 2, 3, 4, 5, 6, 7]#, 8, 9, 10]
 #list_day_shift              = [10, 11, 12, 13]#, 4, 5, 6, 7]#, 8, 9, 10]
 df_loss                     = pd.DataFrame()
@@ -90,6 +90,7 @@ df_parameter_sport          = pd.DataFrame()
 ########
 #df_single = df_single[((df_single.sport == 'hockey') & (df_single.bet_X != 0)) | (df_single.sport == 'soccer')]
 #df_single.dropna(inplace=True)
+
 ########
 
 for day_shift in list_day_shift:
@@ -121,8 +122,10 @@ for day_shift in list_day_shift:
         
         """
         df_test = df_single.copy()
-        df_test = df_single[df_single.sport == 'esports']
+        df_test = df_single[df_single.sport == 'esports']        
         """
+#        df_test = df_test[df_test["ligue"].str.contains('England')]
+
         df_single_filter = optimisation_7_apply(df_test, dict_parameter_sport)
     #        df_parameter_sport = pd.concat((df_parameter_sport, df_parameter_sport_temp))
     
@@ -366,7 +369,7 @@ plt.plot()
 df_dict_result['ROI_day_mean_7d'] = df_dict_result.ROI_day.rolling(window=7).mean()
 df_dict_result['ROI_day_mean_14d'] = df_dict_result.ROI_day.rolling(window=14).mean()
 df_dict_result['ROI_day_mean_21d'] = df_dict_result.ROI_day.rolling(window=21).mean()
-df_dict_result[['ROI_day','ROI_day_mean_7d', 'ROI_day_mean_14d', 'ROI_day_mean_21d']].plot()
+df_dict_result[['ROI_day_mean_7d', 'ROI_day_mean_14d', 'ROI_day_mean_21d']].plot()
 
 
 plt.plot()

@@ -481,6 +481,9 @@ def optimisation_7(df_train, dict_training_option):
     df_train.good_pred_draw[df_train.winner == 0] = 1
 
     for sport in list_sport:
+        a = pd.DataFrame()
+        a_list = []
+
         ### only bet upper limit
         df_train = df_train[df_train.min_bet >= dict_training_option[sport]['limit_bet']]
 
@@ -494,7 +497,8 @@ def optimisation_7(df_train, dict_training_option):
         list_mod_ok             = [] 
         for mod in list_mod:
             df_train_mod = df_train_sport[df_train_sport['mod'] == int(mod)]
-            print mod
+            
+#            print mod
 #            if mod == 21 : ee
             limit_train = 5
             if len(df_train_mod) > limit_train:
@@ -513,7 +517,23 @@ def optimisation_7(df_train, dict_training_option):
                 step_diff_bet = 0.1
                 for i in range(100):
                     df = df_train_mod[df_train_mod.bet_diff > i*step_diff_bet]
+            
+                    df_train_mod_analysis_freq = df.set_index('match_date')
+                    df_train_mod_analysis_freq          = df_train_mod_analysis_freq.resample('W').sum()
+                    df_train_mod_analysis_freq['perc'] = df_train_mod_analysis_freq['good_pred']/(df_train_mod_analysis_freq['good_pred']+df_train_mod_analysis_freq['bad_pred'])
+                    df_train_mod_analysis_freq['gain'] = df_train_mod_analysis_freq['good_pred']*((mod/10.0)-1)-df_train_mod_analysis_freq['bad_pred']
+#                    df_train_mod_analysis_freq.gain.hist(bins=20)
+                    if df_train_mod_analysis_freq['gain'].sum() > 0 and len(df)>50:
+                        a[str(mod/10.0)+'_'+str(i*step_diff_bet)] = df_train_mod_analysis_freq.gain
+                        print i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()
+                        a_list.append([i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()])
                     
+                    df_a_list = pd.DataFrame(a_list)
+                    df_a_list.columns = ['diff', 'mod', 'sum', 'len_df', 'std', 'mean', 'median']
+                    df_a_list['ratio'] = df_a_list['sum']/df_a_list['len_df']
+                    a.plot.box()                    
+        
+            
 #                    result_S = 0
 #                    for item in range(len(df)):
 #                        result_S = result_S + eval_result(df, 'S', item, 1)
@@ -530,7 +550,7 @@ def optimisation_7(df_train, dict_training_option):
                     if len(df) > (nbr_total_bet*0.15):
                         list_high_S.append(round(len(df[df.good_pred == 1])/float(len(df)),2))
                         list_high_SX.append(round((len(df[df.good_pred == 1]) + len(df[(df.winner == 0) & (df.good_pred == 0)]))/float(len(df)),2)) 
-
+                        print i*step_diff_bet, len(df), round(len(df[df.good_pred == 1])/float(len(df)),2), round(len(df[df.good_pred == 1])/float(len(df)),2)*(mod/10.0)
 
 #                        if result_S >0 or result_DNB>0 or result_WNB>0 or result_DC>0:
 #                            perc_restant_after_filter = round(len(df)/float(nbr_total_bet),2)
@@ -553,7 +573,8 @@ def optimisation_7(df_train, dict_training_option):
                 bet_diff_high_S    = index_list_high_S*step_diff_bet
                 bet_diff_high_SX   = index_list_high_SX*step_diff_bet
                 
-                df_train_mod = df_train_mod[df_train_mod.bet_diff >= bet_diff_high_SX]
+                df_train_mod = df_train_mod[df_train_mod.bet_diff >= bet_diff_high_S]
+#                df_train_mod = df_train_mod[df_train_mod.bet_diff >= bet_diff_high_SX]
 
 
 
@@ -608,7 +629,7 @@ def optimisation_7(df_train, dict_training_option):
                     else:
                         result_DC = result_DC - 1
 
-                num_good_pred = df_train_mod['good_pred'].sum()+df_train_mod['good_pred_draw'].sum()
+                num_good_pred = df_train_mod['good_pred'].sum()#+df_train_mod['good_pred_draw'].sum()
                 num_bad_pred  = len(df_train_mod)-num_good_pred
                 
                 perc_win = num_good_pred/float(num_good_pred+num_bad_pred)
@@ -638,31 +659,31 @@ def optimisation_7(df_train, dict_training_option):
                 mod_value  = dict_training_option[sport]['mod_value']
                 limit_DC   = dict_training_option[sport]['limit_DC']
                 
-                list_test.append([sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_SX, date, mode])
+                list_test.append([sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_S, date, mode])
                 
                 limit_number_exemple = 10
                 
                 if int(result)/float(len(df_train_mod)) > limit_DC and mode == 'S' and len(df_train_mod)>limit_number_exemple :
-                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'S', int(result)/float(len(df_train_mod)), perc_win_good, bet_diff_high_SX])
+                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'S', int(result)/float(len(df_train_mod)), perc_win_good, bet_diff_high_S])
                     dict_temp.update({sport:list_mod_ok})
                     
                 if int(result_DNB)/float(len(df_train_mod)) > limit_DC and mode == 'DNB' and len(df_train_mod)>limit_number_exemple:
-                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DNB', int(result_DNB)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
+                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DNB', int(result_DNB)/float(len(df_train_mod)), perc_win, bet_diff_high_S])
                     dict_temp.update({sport:list_mod_ok})
    
                 if int(result_WNB)/float(len(df_train_mod)) > limit_DC and mode == 'WNB' and len(df_train_mod)>limit_number_exemple:
 #                    print sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win    
-                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'WNB', int(result_WNB)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
+                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'WNB', int(result_WNB)/float(len(df_train_mod)), perc_win, bet_diff_high_S])
                     dict_temp.update({sport:list_mod_ok})
                     
                 if int(result_DC)/float(len(df_train_mod)) > limit_DC and mode == 'DC' and len(df_train_mod)>limit_number_exemple:
 #                    print sport, (mod-1)*mod_value+mod_value, mod*mod_value+mod_value, len(df_train_mod), int(result)/float(len(df_train_mod)), int(result_with_draw)/float(len(df_train_mod)), int(result_DNB)/float(len(df_train_mod)), int(result_WNB)/float(len(df_train_mod)), int(result_DC)/float(len(df_train_mod)), perc_win    
-                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DC', int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_SX])
+                    list_mod_ok.append([round((mod-1)*mod_value+mod_value,2),round(mod*mod_value+mod_value,2), len(df_train_mod), mod, 'DC', int(result_DC)/float(len(df_train_mod)), perc_win, bet_diff_high_S])
                     dict_temp.update({sport:list_mod_ok})                    
 
     df          = pd.DataFrame(list_test)
     try:
-        df.columns  = ['sport','bet_min','bet_max','number_bet','S','X','DNB','WNB','DC','perc', 'bet_diff_high_SX', 'date', 'mode']                    
+        df.columns  = ['sport','bet_min','bet_max','number_bet','S','X','DNB','WNB','DC','perc', 'bet_diff_high_S', 'date', 'mode']                    
     except:
         pass
                 

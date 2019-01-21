@@ -82,11 +82,32 @@ for i, file_soccer in enumerate(list_soccer):
     df_soccer_temp = pd.DataFrame.from_csv(file_soccer, encoding='utf-8')
     df_soccer = pd.concat((df_soccer, df_soccer_temp))
 
-df_ALL = pd.DataFrame.from_csv('../dataset/local/soccer/df_ALL_soccer.xls', encoding='utf-8')
-#df_ALL = df_merge_single.copy()
+"""
+os.system('wget http://34.76.65.82:8080/bet/prod/bet/dataset/local/soccer/df_ALL_soccer.xls')
+os.system('mv "df_ALL_soccer.xls" "../dataset/local/soccer/df_ALL_soccer.xls"')
+"""
 
+df_ALL = pd.DataFrame.from_csv('../dataset/local/soccer/df_ALL_soccer.xls', encoding='utf-8')
 df_soccer = df_ALL[df_ALL.sport == 'soccer']
 #df_soccer = pd.concat((df_soccer,df_ALL[df_ALL.sport == 'soccer']))
+df_soccer['bet_1'] = df_soccer.bet_1.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+df_soccer['bet_2'] = df_soccer.bet_2.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+df_soccer['bet_X'] = df_soccer.bet_X.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+
+###
+#df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Cup')]
+#df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Cop')]
+#df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Coup')]
+#df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Euro')]
+#df_soccer = df_soccer[~df_soccer["ligue"].str.contains('World')]
+
+#df_soccer = df_soccer[df_soccer["pays"].str.contains('england')]
+
+"""
+### old dataset runnning
+df_ALL = df_merge_single.copy()
+df_soccer = df_ALL[df_ALL.sport == 'soccer']
+"""
   
 df_soccer['sport']       = 'soccer'
 df_soccer['bet_diff']    = df_soccer.bet_1-df_soccer.bet_2
@@ -118,8 +139,8 @@ df_soccer.match_date = df_soccer.match_date.apply(lambda x : datetime.fromtimest
 #df_soccer = pd.concat((df_soccer,df_merge_single[df_merge_single.sport == 'soccer']))
 
 
-df_test  = df_soccer[df_soccer.match_date > datetime(2018, 8, 8, 0, 46, 43, 100000)]
-df_train = df_soccer[df_soccer.match_date < datetime(2018, 8, 8, 0, 46, 43, 100000)]
+df_test  = df_soccer[(df_soccer.match_date > datetime(2018, 11, 11, 0, 46, 43, 100000))]
+df_train = df_soccer[(df_soccer.match_date < datetime(2018, 11, 11, 0, 46, 43, 100000)) & (df_soccer.match_date > datetime(2016, 8, 8, 0, 46, 43, 100000))]
 
 
 ### OPTIONS
@@ -148,6 +169,13 @@ dict_parameter['option'].update(dict_training_option)
 ### SAVE
 with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
     json.dump(dict_parameter, outfile)
+
+    
+"""
+df = optimisation_7_apply(df_test, dict_parameter)
+dict_parameter_sport = dict_parameter
+"""
+
 
 ee
 # =============================================================================

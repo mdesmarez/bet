@@ -5,7 +5,7 @@ PYTHON_NAME2="scrap_AllLigue_oddsportal.py"
 PYTHON_NAME3="PS3838_import_dataset.py"
 ### without nohup
 PYTHON_NAME4="PS3838_main.py"
-PYTHON_NAME5="PS3838_analysis.py"
+PYTHON_NAME5="scrap_AllLigue_oddsportal_final_df.py"
 
 
 function install_additional(){
