@@ -20,7 +20,7 @@ import numpy              as np
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
 
-from PS3838_support_function                                                   import encode_decode, match_filter_prediction, optimisation_7_apply
+from PS3838_support_function                                                   import encode_decode, match_filter_prediction, optimisation_7_apply, optimisation_8_apply
 
 
 
@@ -111,23 +111,37 @@ for day_shift in list_day_shift:
     date_text = (datetime.now()-timedelta(hours=24*day_shift))
 
 #    if date_text.strftime("%w") in ['0','5','6']:
-    if date_text.strftime("%w") in ['0', '3', '4', '5','6']:
-#    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
+#    if date_text.strftime("%w") in ['0', '3', '4', '5','6']:
+    if date_text.strftime("%w") in ['0','1','2','3','4','5','6']:
         
         print '\n\n$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
         print '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$'
         print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')    
-        with open('../model/local/dict_parameter_sport.json') as json_file:  
-            dict_parameter_sport = json.load(json_file)
+        with open('../model/local/dict_parameter.json') as json_file:  
+            dict_parameter = json.load(json_file)
         
+        with open('../model/local/dict_parameter_sport.json') as json_file:  
+            dict_parameter_7 = json.load(json_file)
+            
         """
         df_test = df_single.copy()
         df_test = df_single[df_single.sport == 'esports']        
         """
-#        df_test = df_test[df_test["ligue"].str.contains('England')]
+#        df_test = df_test[df_test["ligue"].str.contains('Spain')]
+#        df_test = df_test[~df_test["ligue"].str.contains('Cup')]
+#        df_test = df_test[~df_test["ligue"].str.contains('Cop')]
+#        df_test = df_test[~df_test["ligue"].str.contains('Coup')]
+#        df_test = df_test[~df_test["ligue"].str.contains('Euro')]
+#        df_test = df_test[~df_test["ligue"].str.contains('World')]
 
-        df_single_filter = optimisation_7_apply(df_test, dict_parameter_sport)
-    #        df_parameter_sport = pd.concat((df_parameter_sport, df_parameter_sport_temp))
+
+        if len(df_test) != 0:
+            df_test['pays'] = df_test.ligue.apply(lambda x : x.split('-')[0].strip().lower())
+            df_single_filter = optimisation_8_apply(df_test, dict_parameter)
+#            df_single_filter = optimisation_7_apply(df_test, dict_parameter_7)
+
+        else:
+            df_single_filter = pd.DataFrame()
     
         
         num_good_pred         = 0
@@ -302,32 +316,41 @@ for day_shift in list_day_shift:
         print ''
         
         try:
-            list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
-            for sport in list_sport_win_loss:
-                df_win['mod'] = df_win.min_bet/dict_parameter_sport['option'][sport]['mod_value']
-                df_win['mod'] = df_win['mod'].apply(lambda x: int(x))
-                df_loss['mod'] = df_loss.min_bet/dict_parameter_sport['option'][sport]['mod_value']
-                df_loss['mod'] = df_loss['mod'].apply(lambda x: int(x))
+            ee
+            list_pays_win_loss  = list(set(df_win.pays.unique().tolist()+df_loss.pays.unique().tolist()))
+            for pays in list_pays_win_loss:
+                print '*****   ', pays
+                df_win_pays = df_win[df_win.pays == pays]
+                df_loss_pays = df_loss[df_loss.pays == pays]
                 
-                
-                df_win['gain'] = 0
-                df_win.gain[df_win.mode_bet == 'S'] = (df_win.min_bet[df_win.mode_bet == 'S']-1) * mise
-                df_win.gain[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)] = (df_win.bet_X[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]*(1-(1/df_win.min_bet[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]))-1) * mise
-                df_loss['gain'] = -mise 
-                
-                total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
-                total_gain = str(int(df_win[df_win.sport == sport]['gain'].sum() + df_loss[df_loss.sport == sport]['gain'].sum()))
-                print sport, '=> ', total.rjust(4), 'bet /', total_gain.rjust(4), 'euros /', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%'
-                list_mod_win_loss = list(set(df_win[u'mod'][df_win.sport == sport].unique().tolist()+df_loss[u'mod'][df_loss.sport == sport].unique().tolist()))
-                for mod in list_mod_win_loss:
-                    print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '=>', str(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])).rjust(4), 'bet /', str(int(sum(df_win['gain'][df_win[u'mod'] == mod])+sum(df_loss['gain'][df_loss[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])/float(len(df_win[df_win[u'mod'] == mod][df_win.sport == sport])+len(df_loss[df_loss[u'mod'] == mod][df_loss.sport == sport])),1),'%'
-        except:
+                list_sport_win_loss = list(set(df_win_pays.sport.unique().tolist()+df_loss_pays.sport.unique().tolist()))
+                for sport in list_sport_win_loss:
+                    df_win_pays['mod'] = df_win_pays.min_bet/0.1#dict_parameter_sport['option'][sport]['mod_value']
+                    df_win_pays['mod'] = df_win_pays['mod'].apply(lambda x: int(x))
+                    df_loss_pays['mod'] = df_loss_pays.min_bet/0.1#dict_parameter_sport['option'][sport]['mod_value']
+                    df_loss_pays['mod'] = df_loss_pays['mod'].apply(lambda x: int(x))
+                    
+                    
+                    df_win_pays['gain'] = 0
+                    df_win_pays.gain[df_win_pays.mode_bet == 'S'] = (df_win_pays.min_bet[df_win_pays.mode_bet == 'S']-1) * mise
+                    df_win_pays.gain[(df_win_pays.mode_bet == 'WNB') & (df_win_pays.winner == 0)] = (df_win_pays.bet_X[(df_win_pays.mode_bet == 'WNB') & (df_win_pays.winner == 0)]*(1-(1/df_win_pays.min_bet[(df_win_pays.mode_bet == 'WNB') & (df_win_pays.winner == 0)]))-1) * mise
+                    df_loss_pays['gain'] = -mise 
+                    
+                    total = str(len(df_win_pays[df_win_pays.sport == sport]) + len(df_loss_pays[df_loss_pays.sport == sport]))
+                    total_gain = str(int(df_win_pays[df_win_pays.sport == sport]['gain'].sum() + df_loss_pays[df_loss_pays.sport == sport]['gain'].sum()))
+                    print sport, '=> ', total.rjust(4), 'bet /', total_gain.rjust(4), 'euros /', round(100*len(df_win_pays[df_win_pays.sport == sport])/float(len(df_win_pays[df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays.sport == sport])),2),'%'
+                    list_mod_win_loss = list(set(df_win_pays[u'mod'][df_win_pays.sport == sport].unique().tolist()+df_loss_pays[u'mod'][df_loss_pays.sport == sport].unique().tolist()))
+                    for mod in list_mod_win_loss:
+                        print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '=>', str(len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays[u'mod'] == mod][df_loss_pays.sport == sport])).rjust(4), 'bet /', str(int(sum(df_win_pays['gain'][df_win_pays[u'mod'] == mod])+sum(df_loss_pays['gain'][df_loss_pays[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])/float(len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays[u'mod'] == mod][df_loss_pays.sport == sport])),1),'%'
+        except Exception, e:
+            print e
             pass
         print '******************************************'
     
     
         dict_bankroll.update({date_text.strftime("%Y %m %d - %a"):{'total':total_result,'result':result, 'day':date_text.strftime("%a"), 'nbr_bet':len(df_single_filter), 'ROI':round(total_result/float(total_cave)*100,2), 'ROI_day':round(result/float(cave)*100,2)}})
     
+rr
 
 df_dict_result = pd.DataFrame.from_dict(dict_bankroll, orient='index')
 df_dict_result.sort_index(inplace=True)
@@ -349,6 +372,13 @@ df_dict_result_sport.plot()
 plt.style.use('ggplot')
 df_dict_result.reset_index(drop=False, inplace=True)
 df_dict_result.columns  = [u'date_str', u'nbr_bet', u'ROI', u'result', u'ROI_day', u'total', u'day', u'line', u'ratio']
+
+print df_dict_result.groupby('day').sum()
+#del df_dict_result['total']
+del df_dict_result['total']
+df_dict_result.groupby('day').sum().plot()
+
+
 df_dict_result['date']  = df_dict_result.date_str.apply(lambda x : datetime.strptime(x, '%Y %m %d - %a'))
 df_dict_result.set_index('date', drop=True, inplace=True)
 df_dict_result          = df_dict_result.resample('D').sum()
@@ -382,10 +412,7 @@ df_dict_result[['nbr_bet','nbr_bet_7d', 'nbr_bet_14d']].plot()
 
 
 
-print df_dict_result.groupby('day').sum()
-#del df_dict_result['total']
-del df_dict_result['total']
-df_dict_result.groupby('day').sum().plot()
+
 
 
 aa = pd.concat((df_win,df_loss))

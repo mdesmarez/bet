@@ -16,11 +16,10 @@ import time
 import datetime
 import re
 import ast
-
+import math
 
 import matplotlib.pyplot  as plt
 import pandas             as pd
-import numpy              as np
 
 from sklearn.utils import shuffle
 from bs4                  import BeautifulSoup
@@ -518,22 +517,26 @@ def optimisation_7(df_train, dict_training_option):
                 for i in range(100):
                     df = df_train_mod[df_train_mod.bet_diff > i*step_diff_bet]
             
-                    df_train_mod_analysis_freq = df.set_index('match_date')
-                    df_train_mod_analysis_freq          = df_train_mod_analysis_freq.resample('W').sum()
-                    df_train_mod_analysis_freq['perc'] = df_train_mod_analysis_freq['good_pred']/(df_train_mod_analysis_freq['good_pred']+df_train_mod_analysis_freq['bad_pred'])
-                    df_train_mod_analysis_freq['gain'] = df_train_mod_analysis_freq['good_pred']*((mod/10.0)-1)-df_train_mod_analysis_freq['bad_pred']
-#                    df_train_mod_analysis_freq.gain.hist(bins=20)
-                    if df_train_mod_analysis_freq['gain'].sum() > 0 and len(df)>50:
-                        a[str(mod/10.0)+'_'+str(i*step_diff_bet)] = df_train_mod_analysis_freq.gain
-                        print i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()
-                        a_list.append([i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()])
-                    
-                    df_a_list = pd.DataFrame(a_list)
-                    df_a_list.columns = ['diff', 'mod', 'sum', 'len_df', 'std', 'mean', 'median']
-                    df_a_list['ratio'] = df_a_list['sum']/df_a_list['len_df']
-                    a.plot.box()                    
-        
-            
+#                    df_train_mod_analysis_freq = df.set_index('match_date')
+#                    df_train_mod_analysis_freq.dropna(inplace=True)
+#                    df_train_mod_analysis_freq          = df_train_mod_analysis_freq.resample('W').sum()
+#                    df_train_mod_analysis_freq['perc'] = df_train_mod_analysis_freq['good_pred']/(df_train_mod_analysis_freq['good_pred']+df_train_mod_analysis_freq['bad_pred'])
+#                    df_train_mod_analysis_freq['gain'] = df_train_mod_analysis_freq['good_pred']*((mod/10.0)-1)-df_train_mod_analysis_freq['bad_pred']
+##                    df_train_mod_analysis_freq.gain.hist(bins=20)
+#                    if df_train_mod_analysis_freq['gain'].mean() > 0 and len(df)>50:
+#                        a[str(mod/10.0)+'_'+str(i*step_diff_bet)] = df_train_mod_analysis_freq.gain
+#                        print i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), df_train_mod_analysis_freq['gain'].sum()/float(len(df)), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()
+#                        a_list.append([i*step_diff_bet, mod, df_train_mod_analysis_freq['gain'].sum(), len(df), df_train_mod_analysis_freq['gain'].sum()/float(len(df)), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].std(),  a[str(mod/10.0)+'_'+str(i*step_diff_bet)].mean(), a[str(mod/10.0)+'_'+str(i*step_diff_bet)].median()])
+#                       
+#                        ee
+#                        df_a_list = pd.DataFrame(a_list)
+#                        df_a_list.columns = ['diff', 'mod', 'sum', 'len_df', 'sum/len_df', 'std', 'mean', 'median']
+#                        df_a_list['ratio'] = df_a_list['sum']/df_a_list['len_df']
+#                        df_a_list['name'] = df_a_list['mod'].map(str) + '_' + df_a_list['diff'].map(str)
+#                        ax = df_a_list.plot(kind='scatter',x='mean',y='std')
+#                        df_a_list[['mean','std','name']].apply(lambda x: ax.text(*x),axis=1)
+#
+#                
 #                    result_S = 0
 #                    for item in range(len(df)):
 #                        result_S = result_S + eval_result(df, 'S', item, 1)
@@ -684,6 +687,10 @@ def optimisation_7(df_train, dict_training_option):
     df          = pd.DataFrame(list_test)
     try:
         df.columns  = ['sport','bet_min','bet_max','number_bet','S','X','DNB','WNB','DC','perc', 'bet_diff_high_S', 'date', 'mode']                    
+        df_a_list = pd.DataFrame(a_list)
+        df_a_list.columns = ['diff', 'mod', 'sum', 'len_df', 'sum/len_df', 'std', 'mean', 'median']
+        df_a_list['ratio'] = df_a_list['sum']/df_a_list['len_df']
+#        a.plot.box(rot=90, grid=True)                    
     except:
         pass
                 
@@ -806,4 +813,410 @@ def optimisation_4(df, mod_value):
     return list_mod_ok
 
 
+# =============================================================================
+# 
+# =============================================================================
 
+def test_tes(df_test_sport, dict_temp_parameter_sport):
+    initial_bankroll            = 500
+    bankroll                    = initial_bankroll
+    mise                        = 20
+    cave                        = 0
+    result                      = 0
+    min_cave                    = 0
+    max_cave                    = 0    
+    day_shift                   = 0
+    total_result                = 0
+    total_cave                  = 0
+    total_nbr_bet               = 0
+    dict_bankroll               = {}
+    dict_bankroll_day           = {}
+    dict_parameter_sport_single = {}
+    dict_result_sport           = {}
+    dict_ok                     = {}
+    df_loss                     = pd.DataFrame()
+    df_win                      = pd.DataFrame()
+    
+    df_single_filter = optimisation_7_apply(df_test_sport, dict_temp_parameter_sport)
+    
+    
+    num_good_pred         = 0
+    num_good_draw_pred    = 0
+    num_bad_pred          = 0
+    for item in range(len(df_single_filter)):
+        total_nbr_bet = total_nbr_bet + 1
+        
+        min_bet = df_single_filter.min_bet.iloc[item]+0.0000001
+        bet_X   = df_single_filter.bet_X.iloc[item]+0.0000001
+        bet_DC  = 1/((1/min_bet)+(1/bet_X))
+        bet_DNB = (1-(1/bet_X))*min_bet
+        bet_WNB = (1-(1/min_bet))*bet_X
+        sport   = df_single_filter.sport.iloc[item]
+
+        try:
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result']
+        except:
+            dict_result_sport.update({sport:{'result':0}})
+                                
+
+        if df_single_filter.mode_bet.iloc[item] == 'DC':
+            cave = cave + mise
+            result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
+
+            if df_single_filter.good_pred.iloc[item] == 1 or df_single_filter.winner.iloc[item] == 0:
+                result = result + bet_DC*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_DC*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_DC*mise
+                num_good_draw_pred = num_good_draw_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+            else:
+                num_bad_pred = num_bad_pred + 1
+                df_loss = pd.concat((df_loss, pd.DataFrame(df_single_filter.iloc[item]).T))
+
+
+        if df_single_filter.mode_bet.iloc[item] == 'DNB':
+            cave = cave + mise
+            result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
+
+            if df_single_filter.good_pred.iloc[item] == 1:
+                result = result + bet_DNB*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_DNB*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_DNB*mise
+
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+                
+            if df_single_filter.winner.iloc[item] == 0:
+                result = result + mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + mise
+
+                num_good_draw_pred = num_good_draw_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+
+            
+            if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                num_bad_pred = num_bad_pred + 1
+                df_loss = pd.concat((df_loss, pd.DataFrame(df_single_filter.iloc[item]).T))
+
+                
+        if df_single_filter.mode_bet.iloc[item] == 'WNB':
+            cave = cave + mise
+            result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
+
+            
+            if df_single_filter.good_pred.iloc[item] == 1:
+                result = result + mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + mise
+
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+                
+            if df_single_filter.winner.iloc[item] == 0:
+                result = result + bet_WNB*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + bet_WNB*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + bet_WNB*mise
+
+                num_good_draw_pred = num_good_draw_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+            
+            if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                num_bad_pred = num_bad_pred + 1
+                df_loss = pd.concat((df_loss, pd.DataFrame(df_single_filter.iloc[item]).T))
+                
+                                    
+        
+        if df_single_filter.mode_bet.iloc[item] == 'X':
+            cave = cave + mise*2
+            result = result - mise*2
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise*2})
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise*2
+
+            if df_single_filter.good_pred.iloc[item] == 1 and df_single_filter.winner.iloc[item] != 0:
+                result = result + df_single_filter.min_bet.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise
+
+                num_good_draw_pred = num_good_draw_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+            
+            if df_single_filter.winner.iloc[item] == 0:
+                result = result + df_single_filter.bet_X.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + df_single_filter.bet_X.iloc[item]*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.bet_X.iloc[item]*mise
+
+                num_good_draw_pred = num_good_draw_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+            
+            if df_single_filter.good_pred.iloc[item] == 0 and df_single_filter.winner.iloc[item] != 0:
+                num_bad_pred = num_bad_pred + 1
+                df_loss = pd.concat((df_loss, pd.DataFrame(df_single_filter.iloc[item]).T))
+
+
+        if df_single_filter.mode_bet.iloc[item] == 'S':
+            cave = cave + mise
+            result = result - mise
+            dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] - mise})
+            dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] - mise
+
+            if df_single_filter.good_pred.iloc[item] == 1:
+                result = result + df_single_filter.min_bet.iloc[item]*mise
+                dict_result_sport[sport].update({day_shift:dict_result_sport[sport]['result'] + + df_single_filter.min_bet.iloc[item]*mise})
+                dict_result_sport[sport]['result'] = dict_result_sport[sport]['result'] + df_single_filter.min_bet.iloc[item]*mise
+
+                num_good_pred = num_good_pred + 1
+                df_win = pd.concat((df_win, pd.DataFrame(df_single_filter.iloc[item]).T))
+            else:
+                num_bad_pred = num_bad_pred + 1
+                df_loss = pd.concat((df_loss, pd.DataFrame(df_single_filter.iloc[item]).T))
+        
+        
+    if len(df_single_filter) != 0:
+        print('******** RESULT SIMULATION **********')
+#        print dict_temp_parameter_sport
+        print 'Mise                  : ', int(mise), '€'
+        print 'Number Good pred      : ', num_good_pred
+        print 'Number Good Draw pred : ', num_good_draw_pred
+        print 'Number Bad pred       : ', num_bad_pred
+        print '% : ', round(num_good_pred/float(num_good_pred+num_bad_pred+0.01)*100,2), '%'
+        print 'Mean bet : ', df_single_filter.min_bet.mean()
+        print 'cave     : ', int(cave),' €'
+        print 'gain pur : ', int(result),' €'
+        print 'ROI cave : ', round(result/float(cave)*100,2), '%'
+        print 'ROI mise : ',round(result/mise,2)*100,"%"
+        print('*************************************')
+            
+    bankroll     = bankroll + result
+    total_result = total_result + result
+    total_cave   = total_cave + cave   
+    
+    if total_result < min_cave:
+        min_cave = total_result 
+    if total_result > max_cave:
+        max_cave = total_result
+        
+
+    print 'BANKROLL       : ', int(bankroll), '€'
+    print 'GAIN TOTAL     : ', int(total_result), '€'
+    print 'INVEST TOTAL   : ', int(total_cave)
+    print 'NBR BET TOTAL  : ', total_nbr_bet
+    print 'ROI cave       : ', round(total_result/float(total_cave+0.0001)*100,2), '%'
+    print 'ROC cave       : ', round(total_result/float(initial_bankroll)*100,2), '%'
+    print 'MIN CAVE       : ', int(min_cave), '€', int(round(min_cave/mise))
+    print 'MAX CAVE       : ', int(max_cave), '€', int(round(max_cave/mise))
+    print ''
+    
+    try:
+        list_sport_win_loss = list(set(df_win.sport.unique().tolist()+df_loss.sport.unique().tolist()))
+        dict_ok = {}
+        for sport in list_sport_win_loss:
+            df_win['mod'] = df_win.min_bet/dict_temp_parameter_sport['option'][sport]['mod_value']
+            df_win['mod'] = df_win['mod'].apply(lambda x: int(x))
+            df_loss['mod'] = df_loss.min_bet/dict_temp_parameter_sport['option'][sport]['mod_value']
+            df_loss['mod'] = df_loss['mod'].apply(lambda x: int(x))
+            
+            
+            df_win['gain'] = 0
+            df_win.gain[df_win.mode_bet == 'S'] = (df_win.min_bet[df_win.mode_bet == 'S']-1) * mise
+            df_win.gain[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)] = (df_win.bet_X[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]*(1-(1/df_win.min_bet[(df_win.mode_bet == 'WNB') & (df_win.winner == 0)]))-1) * mise
+            df_loss['gain'] = -mise 
+            
+            total = str(len(df_win[df_win.sport == sport]) + len(df_loss[df_loss.sport == sport]))
+            total_gain = str(int(df_win[df_win.sport == sport]['gain'].sum() + df_loss[df_loss.sport == sport]['gain'].sum()))
+            print sport, '=> ', total.rjust(4), 'bet /', total_gain.rjust(4), 'euros /', round(100*len(df_win[df_win.sport == sport])/float(len(df_win[df_win.sport == sport])+len(df_loss[df_loss.sport == sport])),2),'%'
+            df_win.bet_diff = df_win.bet_diff.apply(lambda x: round(math.floor(x*10)/10.0,1))
+            df_loss.bet_diff = df_loss.bet_diff.apply(lambda x: round(math.floor(x*10)/10.0,1))
+            list_mod_win_loss = list(set(df_win[u'mod'][df_win.sport == sport].unique().tolist()+df_loss[u'mod'][df_loss.sport == sport].unique().tolist()))
+            for mod in list_mod_win_loss:
+                list_diff_win_loss = list(set(df_win[u'bet_diff'][(df_win.sport == sport) & (df_win[u'mod'] == mod)].unique().tolist()+df_loss[u'bet_diff'][(df_loss.sport == sport) & (df_loss[u'mod'] == mod)].unique().tolist()))
+                list_diff_win_loss.sort()
+                for diff in list_diff_win_loss:
+                    df_win_diff = df_win[(df_win[u'mod'] == mod) & (df_win.sport == sport) & (df_win.bet_diff >= diff)]
+                    df_loss_diff = df_loss[(df_loss[u'mod'] == mod) & (df_loss.sport == sport) & (df_loss.bet_diff >= diff)]
+                    result_gain  = int(sum(df_win_diff['gain'][df_win_diff[u'mod'] == mod])+sum(df_loss_diff['gain'][df_loss_diff[u'mod'] == mod]))
+                    nbr_bet      = len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])
+                    perc         = round(100*len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])/float(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])),1)
+                    if (nbr_bet > 5) and result_gain>0:
+#                        try:
+#                            _ = dict_ok[sport]
+#                        except:
+#                            dict_ok.update({sport:{}})
+#                            
+                        try:
+                            if dict_ok[mod]['perc'] < perc:
+                                dict_ok[mod]['result_gain'] = result_gain
+                                dict_ok[mod]['diff'] = diff    
+                                dict_ok[mod]['result_gain'] = result_gain
+                        except:
+                            dict_ok.update({mod:{'result_gain':result_gain , 'diff':diff, 'perc':perc}})
+                        print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '|', str(diff) ,'=>', str(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])).rjust(4), 'bet /', str(int(sum(df_win_diff['gain'][df_win_diff[u'mod'] == mod])+sum(df_loss_diff['gain'][df_loss_diff[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])/float(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])),1),'%'
+    except Exception, e:
+        print e
+        pass
+    print '******************************************'
+
+
+    
+    return df_win, df_loss, dict_ok
+
+# =============================================================================
+# 
+# =============================================================================
+def optimisation_8(df_train, df_test, dict_training_option):
+    dict_temp   = {}
+    df_a_list = pd.DataFrame()
+
+    ### only bet upper limit
+    df_train = df_train[df_train.min_bet >= dict_training_option[dict_training_option.keys()[0]]['limit_bet']]
+                
+    a            = pd.DataFrame(df_train.pays.value_counts()>500)
+    a            = a[a['pays'] == True]
+    list_big_pays = a.index.tolist()
+    list_big_pays = [str(item) for item in list_big_pays]
+    df_train = df_train[df_train['pays'].isin(list_big_pays)]
+
+    list_sport  = df_train.sport.unique().tolist()
+    ###
+    list_pays   = df_train.pays.unique().tolist()
+    
+#    df_train.fillna(1, inplace=True)
+
+    df_train['good_pred_draw'] = 0
+    df_train.good_pred_draw[df_train.winner == 0] = 1
+
+    dict_result = {}
+    for sport in list_sport:
+        try:
+            _ = dict_result[sport]
+        except:
+            dict_result.update({sport:{}})
+                            
+        a = pd.DataFrame()
+        a_list = []
+        for z, pays in enumerate(list_pays):
+            print pays, z+1, len(list_pays)
+            
+            ### filter on sport
+            df_train_sport = df_train[df_train.sport == sport]
+    
+            ### filter pays
+            df_train_sport = df_train_sport[df_train_sport.pays == pays]
+            
+            ### mod value
+            df_train_sport['mod'] = df_train_sport.min_bet/dict_training_option[sport]['mod_value']
+            df_train_sport['mod'] = df_train_sport['mod'].apply(lambda x: int(x))
+            list_mod = list(set(df_train_sport['mod'].tolist()))
+            list_mod.sort()
+    
+            ###        
+            df_train_sport.sort_values('min_bet', inplace=True)
+            
+            for mod in list_mod:
+                df_train_mod = df_train_sport[df_train_sport['mod'] == int(mod)]
+    #            print mod
+    #            if mod == 21 : ee
+                step_diff_bet = 0.1
+                for i in range(100):
+                    df = df_train_mod[df_train_mod.bet_diff > i*step_diff_bet]
+            
+                    df_train_mod_analysis_freq = df.set_index('match_date')
+                    df_train_mod_analysis_freq.dropna(inplace=True)
+                    df_train_mod_analysis_freq          = df_train_mod_analysis_freq.resample('W').sum()
+                    df_train_mod_analysis_freq['perc'] = df_train_mod_analysis_freq['good_pred']/(df_train_mod_analysis_freq['good_pred']+df_train_mod_analysis_freq['bad_pred'])
+                    df_train_mod_analysis_freq['gain'] = df_train_mod_analysis_freq['good_pred']*((mod/10.0)-1)-df_train_mod_analysis_freq['bad_pred']
+    
+                    GAIN_MEAN  = df_train_mod_analysis_freq['gain'].mean()
+                    GAIN_STD   = df_train_mod_analysis_freq['gain'].std()
+                    limit_mean_min = 0.0
+                    limit_std_max  = 0.8
+                    if GAIN_MEAN > limit_mean_min and GAIN_STD <= limit_std_max and len(df)>10:
+                        a_list.append([GAIN_MEAN, GAIN_STD, df_train_mod_analysis_freq['gain'].sum(), len(df), mod, i*step_diff_bet, pays])
+                        
+            if len(a_list) != 0:
+                df_a_list = pd.DataFrame(a_list)
+                df_a_list.columns = ['GAIN_MEAN', 'GAIN_STD', 'sum', 'len_df', 'mod', 'diff', 'pays']
+                df_a_list['name'] = df_a_list['mod'].map(str) + '_' + df_a_list['diff'].map(str)
+
+        list_pays = df_a_list.pays.unique().tolist()
+        fig, axes = plt.subplots(nrows=len(list_pays)/4+1, ncols=4, sharex=True, sharey=True)
+        for ax, pays in zip(axes.flat, list_pays):
+            dict_result[sport].update({pays:{}})
+            print '\n\n\n**********ùùùùùùùù'
+            print pays
+            print '**********ùùùùùùùù'
+            df_a_list[df_a_list.pays == pays].plot(kind='scatter',x='GAIN_MEAN',y='GAIN_STD', title=pays, ax=ax)
+            df_a_list[df_a_list.pays == pays][['GAIN_MEAN','GAIN_STD','name']].apply(lambda x: ax.text(*x),axis=1)
+
+            dict_temp_temp = {}
+            list_temp_parameter_sport = []     
+            dict_temp_parameter_sport = {}
+            dict_ok = {}
+            for item in range(len(df_a_list[df_a_list.pays == pays])):
+                mod     = df_a_list[df_a_list.pays == pays].iloc[item]['mod']
+                diff    = df_a_list[df_a_list.pays == pays].iloc[item]['diff']
+                GAIN_MEAN = df_a_list[df_a_list.pays == pays].iloc[item]['GAIN_MEAN']
+                GAIN_STD  = df_a_list[df_a_list.pays == pays].iloc[item]['GAIN_STD']
+                mod_step = 1
+#                list_temp_parameter_sport.append([round(mod/10.0,2), round((mod+mod_step)/10.0,2), GAIN_MEAN, GAIN_STD, 'S', '', '', round(diff,2)])
+
+                ### find lowest std                
+                try:
+                    if dict_temp_temp[mod]['GAIN_STD'] > GAIN_STD:
+                        dict_temp_temp[mod]['GAIN_STD'] = GAIN_STD
+                        dict_temp_temp[mod]['diff'] = diff
+
+                except:
+                    dict_temp_temp.update({mod:{'GAIN_STD':GAIN_STD, 'diff':diff, 'GAIN_MEAN':GAIN_MEAN}})
+            
+            for key_mod, value_mod in dict_temp_temp.items():
+                mod       = int(key_mod)
+                GAIN_MEAN = value_mod['GAIN_MEAN'] 
+                GAIN_STD  = value_mod['GAIN_STD']
+                diff      = value_mod['diff']
+                list_temp_parameter_sport.append([round(mod/10.0,2), round((mod+mod_step)/10.0,2), GAIN_MEAN, GAIN_STD, 'S', '', '', round(diff,2)])
+                ### shortcut
+                dict_ok.update({mod:{'result_gain':0 , 'diff':diff, 'perc':0}})
+
+            dict_temp_parameter_sport.update({sport:list_temp_parameter_sport, 'option':dict_training_option})
+            
+#            if pays == 'brazil': ee
+            ### VALIDATION
+            df_test_sport = df_test[df_test.pays == pays].copy()
+#            df_win, df_loss, dict_ok = test_tes(df_test_sport, dict_temp_parameter_sport)
+            dict_result[sport][pays].update(dict_ok)
+            
+            
+            
+            """
+            ax = df_a_list[df_a_list.pays == pays].plot(kind='scatter',x='GAIN_MEAN',y='GAIN_STD', title=pays)
+            df_a_list[df_a_list.pays == pays][['GAIN_MEAN','GAIN_STD','name']].apply(lambda x: ax.text(*x),axis=1)
+            """
+                
+    return dict_result, df_a_list
+
+# =============================================================================
+# 
+# =============================================================================
+def optimisation_8_apply(df_test, dict_parameter):
+    df_test['mod'] = df_test.min_bet/0.1
+    df_test['mod'] = df_test['mod'].apply(lambda x: int(x))
+     
+    df_final = pd.DataFrame()     
+    list_sport = dict_parameter['option'].keys()
+    for sport in list_sport:
+        list_pays = dict_parameter[sport].keys()
+        for pays in list_pays:
+            list_mod = dict_parameter[sport][pays].keys()
+            if len(list_mod) != 0:
+                for mod in list_mod:
+                    diff = dict_parameter[sport][pays][mod]['diff']
+#                    print sport, pays, mod, diff
+                    df_mod = df_test[(df_test[u'mod'] == int(mod)) & (df_test[u'bet_diff'] >= diff) & (df_test[u'pays'] == pays) & (df_test[u'sport'] == sport)]
+                    df_final = pd.concat((df_final, df_mod))
+    df_final['mode_bet'] = 'S'
+    return df_final

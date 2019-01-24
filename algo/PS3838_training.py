@@ -21,19 +21,18 @@ import json
 
 import matplotlib.pyplot  as plt
 import pandas             as pd
-import numpy              as np
 
 from bs4                  import BeautifulSoup
 from glob                                                                      import glob
 from datetime                                                                  import datetime
 from datetime                                                                  import timedelta
 
-from PS3838_support_function                                                   import optimisation_7, optimisation_7_apply, encode_decode
+from PS3838_support_function                                                   import optimisation_8, optimisation_7, optimisation_7_apply, encode_decode
 
 # =============================================================================
 # 
 # =============================================================================
-dict_parameter = {'option':{}}
+dict_parameter_save = {'option':{}}
 
 
 
@@ -101,7 +100,7 @@ df_soccer['bet_X'] = df_soccer.bet_X.apply(lambda x : (x/100)+1 if x>0 else (100
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Euro')]
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('World')]
 
-#df_soccer = df_soccer[df_soccer["pays"].str.contains('england')]
+#df_soccer = df_soccer[df_soccer["pays"].str.contains('israel')]
 
 """
 ### old dataset runnning
@@ -121,7 +120,7 @@ df_soccer['min_bet']     = df_soccer[['bet_1','bet_2']].min(axis=1)
 df_soccer['prediction']  = df_soccer.bet_diff.apply(lambda x : "1" if x<0 else "2")
 df_soccer['bet_diff']    = abs(df_soccer['bet_diff'])
 
-df_soccer = df_soccer[['match_date', 'sport', 'ligue','bet_1', 'bet_2', 'bet_X', 'bet_diff', 'min_bet', 'winner', 'prediction', 'team_home', 'good_pred', 'bad_pred']]
+df_soccer = df_soccer[['match_date', 'sport', 'pays', 'ligue','bet_1', 'bet_2', 'bet_X', 'bet_diff', 'min_bet', 'winner', 'prediction', 'team_home', 'good_pred', 'bad_pred']]
 
 df_soccer.winner[df_soccer.winner == 'X'] = 0
 df_soccer.winner[df_soccer.winner == '1'] = 1
@@ -138,37 +137,33 @@ df_soccer.match_date = df_soccer.match_date.apply(lambda x : datetime.fromtimest
 ###
 #df_soccer = pd.concat((df_soccer,df_merge_single[df_merge_single.sport == 'soccer']))
 
+datetime_limit = datetime(2018, 12, 12, 0, 46, 43, 100000)
+df_test  = df_soccer[(df_soccer.match_date > datetime_limit)]# & (df_soccer.match_date < datetime(2018, 11, 20, 0, 46, 43, 100000))]
+df_train = df_soccer[(df_soccer.match_date < datetime_limit)]# & (df_soccer.match_date > datetime(2016, 9, 9, 0, 46, 43, 100000))]
 
-df_test  = df_soccer[(df_soccer.match_date > datetime(2018, 11, 11, 0, 46, 43, 100000))]
-df_train = df_soccer[(df_soccer.match_date < datetime(2018, 11, 11, 0, 46, 43, 100000)) & (df_soccer.match_date > datetime(2016, 8, 8, 0, 46, 43, 100000))]
-
+"""
+df_train.pays.value_counts()
+"""
 
 ### OPTIONS
 dict_training_option = {'soccer':{
                                 'mod_value':       0.1,
                                 'limit_bet':       2.0,
-                                'limit_DC':        0.0002,#0.025,#
+                                'limit_DC':        0.0,
                                 'limit_perf_min':  0,
                                 'force_mode':      '',
                                  }}
 
 
-#dict_training_option = {'soccer':{
-#                                'mod_value':       0.1,
-#                                'limit_bet':       1.0,
-#                                'limit_DC':        -10.0,
-#                                'limit_perf_min':  0,
-#                                'force_mode':      '',
-#                                 }}
-
 ### TRAINING
-dict_parameter_sport, df_parameter_soccer = optimisation_7(df_train, dict_training_option)
-dict_parameter.update({dict_parameter_sport.keys()[0]:dict_parameter_sport[dict_parameter_sport.keys()[0]]})
-dict_parameter['option'].update(dict_training_option)
-        
+dict_parameter_sport, df_a_list = optimisation_8(df_train, df_test, dict_training_option)
+dict_parameter_save.update({dict_parameter_sport.keys()[0]:dict_parameter_sport[dict_parameter_sport.keys()[0]]})
+dict_parameter_save['option'].update(dict_training_option)
+
+
 ### SAVE
-with open('../model/local/dict_parameter_sport.json', 'w') as outfile:
-    json.dump(dict_parameter, outfile)
+with open('../model/local/dict_parameter.json', 'w') as outfile:
+    json.dump(dict_parameter_save, outfile, sort_keys = True, indent = 4,)
 
     
 """

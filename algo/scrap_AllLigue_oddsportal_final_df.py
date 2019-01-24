@@ -8,33 +8,27 @@ Created on Mon Jan 21 13:01:13 2019
 # =============================================================================
 # IMPORT PACKAGES
 # =============================================================================
-import os
-import urllib2
-import dateparser
-import time
-import datetime
-import re
-import ast
 import json
 
-import pandas             as pd
-import numpy              as np
-
-from bs4                  import BeautifulSoup
+import pandas as pd
 from glob                 import glob
-
-from datetime             import datetime
-
 
 # =============================================================================
 # 
 # =============================================================================
 with open('../dataset/local/dict_archived.json') as json_file:  
     dict_archived = json.load(json_file)
-    
-for sport, sport_v in dict_archived.items():
-    print sport
-#    sport = 'soccer'
+
+list_pays = [item for item, _ in dict_archived.items()]
+list_pays.sort()
+list_sport = []
+
+for pays in list_pays:
+    for sport, sport_v in dict_archived[pays].items():
+        list_sport.append(sport)
+list_sport = list(set(list_sport))
+
+for sport in list_sport:        
     try:    
         df_sport = pd.read_csv('../dataset/local/' + sport + '/df_ALL_' + sport + '.xls', index_col=0, encoding='utf-8')
         df_sport.drop_duplicates('match_id', inplace=True)
