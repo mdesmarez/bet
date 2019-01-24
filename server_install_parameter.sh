@@ -15,6 +15,7 @@ sudo apt-get install gconf-service libasound2 libatk1.0-0 libc6 libcairo2 libcup
 sudo apt-get install python-tk
 curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
 sudo apt install nodejs
+sudo npm install npm@latest -g
 npm i puppeteer
 }
 
