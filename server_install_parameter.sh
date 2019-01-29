@@ -16,6 +16,7 @@ sudo apt-get install python-tk
 curl -sL https://deb.nodesource.com/setup_8.x | sudo bash -
 sudo apt install nodejs
 sudo npm install npm@latest -g
+npm init
 npm i puppeteer
 }
 

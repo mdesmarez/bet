@@ -20,6 +20,7 @@ import datetime
 import re
 import ast
 import json
+import unicodedata
 
 import pandas             as pd
 import numpy              as np
@@ -75,23 +76,30 @@ def bs4_recover_bet(soup, dict_odds, pays, sport, ligue):
                 print 'bookmakers_name :', bookmakers_name
                 try:
                     match_name              = match.find('td', { "class" : "name table-participant"}).text
+                    print 'match_name'
+                    match_name = unicodedata.normalize("NFKD", match_name)
                     print match_name
                     match_date              = str(match.find_all('td')[0]).split('"')[1].split('t')[-1].split('-')[0]
+                    print 'team_home'
                     team_home               = match_name.split('-')[0].strip()
                     team_away               = match_name.split('-')[1].strip()
                     if len(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})) == 2:
+                        print ('X=0')
                         bet_1                   = float(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})[0].text)
                         bet_X                   = 0
                         bet_2                   = float(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})[1].text) 
                     else:
+                        print ('X=X')
                         bet_1                   = float(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})[0].text)
                         bet_X                   = float(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})[1].text)
                         bet_2                   = float(match_detail.find_all('td', { "class" : re.compile(r'right odds*')})[2].text)
+                    print 'score'
                     score                   = match.find('td', { "class" : "center bold table-odds table-score"}).text
                     try:
                         score_home              = score.split(':')[0]
                         score_away              = score.split(':')[1].split(' ')[0]
                     except Exception,e :
+                        print 'ERROR LINE : 96'
                         score_home              = "999"
                         score_away              = "999"
                         print e                    
@@ -106,6 +114,7 @@ def bs4_recover_bet(soup, dict_odds, pays, sport, ligue):
                         result      = 'X'
                         result_bet  = bet_X 
                         
+                    print 'dict_odd'
                     dict_odds.update({match['xeid']+'_'+str(year):{
                                         'match_name' : match_name,
                                         'match_id'   : match['xeid'],
@@ -129,6 +138,7 @@ def bs4_recover_bet(soup, dict_odds, pays, sport, ligue):
                     break
                 
                 except Exception,e :
+                    print 'ERROR LINE : 134'
                     print e
             
     return dict_odds, count_no_bookmaker
@@ -235,6 +245,7 @@ try:
 except:
     dict_archived = {}
 
+
     
 list_ligue = []
 list_sport = [\
@@ -317,6 +328,8 @@ for pays_prio in list_pays_prio:
 list_pays.sort()
 list_pays = list_pays_prio + list_pays
 
+#list_pays = [u'spain']
+
 for pays in list_pays:
     print pays
     for sport, sport_v in dict_archived[pays].items():
@@ -356,6 +369,9 @@ for pays in list_pays:
 # DIVE INTO EACH PAGE AND EACH MATCH OF EACH LEAGUE
 # =============================================================================
 #%%
+
+#dict_archived['spain']['soccer']['Super Cup']['done'] = 2
+
 for pays in list_pays:
     print pays
     for sport, sport_v in dict_archived[pays].items():
@@ -383,7 +399,7 @@ for pays in list_pays:
                                 else:
                                     page_max_number = 0
                                 
-                                
+                                print 'goto bs4'
                                 dict_odds, count_no_bookmaker = bs4_recover_bet(soup, dict_odds, pays, sport, ligue)
                                 print 'return count_no_bookmaker other page', count_no_bookmaker
                                 if page_max_number !=0 and count_no_bookmaker < 7:
@@ -397,17 +413,25 @@ for pays in list_pays:
                                         soup              = BeautifulSoup(open(save_web_page), "html.parser")
                                         dict_odds, count_no_bookmaker = bs4_recover_bet(soup, dict_odds, pays, sport, ligue)
             
+                    print 'len dict_odds', len(dict_odds)
                     if dict_odds != {}:
+                        print 'save_dict 415'
+                        ### SAVE
+                        with open('../dataset/local/' + sport + '/oddsportal/dict_' + pays + '_' + ligue + '.json', 'w') as outfile:
+                            json.dump(dict_odds, outfile)
+                            
                         df_temp         = pd.DataFrame.from_dict(dict_odds, orient='index')
                         df_temp.to_csv('../dataset/local/' + sport + '/df_oddsportal_' + sport + '_' + pays + '_' + ligue + '.csv', encoding='utf-8')
                     ligue_v['done'] = 3
                     
                     
                     ### SAVE
+                    print 'save_df'
                     with open('../dataset/local/dict_archived.json', 'w') as outfile:
                         json.dump(dict_archived, outfile)
                     save_df()
                         
                 except Exception, e:
+                    print 'error 432'
                     print e, save_web_page
                 

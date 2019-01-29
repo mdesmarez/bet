@@ -6,6 +6,8 @@ __pycache__/
 *.json
 
 # local folder
+package.json
+package-lock.json
 dataset/local/**
 model/local/**
 algo/venv/**

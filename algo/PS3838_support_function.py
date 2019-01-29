@@ -20,6 +20,7 @@ import math
 
 import matplotlib.pyplot  as plt
 import pandas             as pd
+import numpy              as np
 
 from sklearn.utils import shuffle
 from bs4                  import BeautifulSoup
@@ -1041,7 +1042,7 @@ def test_tes(df_test_sport, dict_temp_parameter_sport):
                     result_gain  = int(sum(df_win_diff['gain'][df_win_diff[u'mod'] == mod])+sum(df_loss_diff['gain'][df_loss_diff[u'mod'] == mod]))
                     nbr_bet      = len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])
                     perc         = round(100*len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])/float(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])),1)
-                    if (nbr_bet > 5) and result_gain>0:
+                    if (nbr_bet > 0) and result_gain>0:
 #                        try:
 #                            _ = dict_ok[sport]
 #                        except:
@@ -1060,7 +1061,21 @@ def test_tes(df_test_sport, dict_temp_parameter_sport):
         pass
     print '******************************************'
 
-
+    ###
+    print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+    print '%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%'
+    for item in dict_temp_parameter_sport[sport]:
+        try:
+            mod         = int(item[0]*10)
+            diff        = item[7] 
+            df_win_diff = df_win[(df_win[u'mod'] == mod) & (df_win.sport == sport) & (df_win.bet_diff >= diff)]
+            df_loss_diff = df_loss[(df_loss[u'mod'] == mod) & (df_loss.sport == sport) & (df_loss.bet_diff >= diff)]
+            result_gain  = int(sum(df_win_diff['gain'][df_win_diff[u'mod'] == mod])+sum(df_loss_diff['gain'][df_loss_diff[u'mod'] == mod]))
+            nbr_bet      = len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])
+            perc         = round(100*len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])/float(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])),1)
+            print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '|', str(diff) ,'=>', str(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])).rjust(4), 'bet /', str(int(sum(df_win_diff['gain'][df_win_diff[u'mod'] == mod])+sum(df_loss_diff['gain'][df_loss_diff[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])/float(len(df_win_diff[(df_win_diff[u'mod'] == mod) & (df_win_diff.sport == sport)])+len(df_loss_diff[(df_loss_diff[u'mod'] == mod) & (df_loss_diff.sport == sport)])),1),'%'
+        except:
+            pass
     
     return df_win, df_loss, dict_ok
 
@@ -1074,7 +1089,7 @@ def optimisation_8(df_train, df_test, dict_training_option):
     ### only bet upper limit
     df_train = df_train[df_train.min_bet >= dict_training_option[dict_training_option.keys()[0]]['limit_bet']]
                 
-    a            = pd.DataFrame(df_train.pays.value_counts()>500)
+    a            = pd.DataFrame(df_train.pays.value_counts()> dict_training_option[dict_training_option.keys()[0]]['nbr_min_match_by_pays'] )
     a            = a[a['pays'] == True]
     list_big_pays = a.index.tolist()
     list_big_pays = [str(item) for item in list_big_pays]
@@ -1127,30 +1142,38 @@ def optimisation_8(df_train, df_test, dict_training_option):
                     df_train_mod_analysis_freq = df.set_index('match_date')
                     df_train_mod_analysis_freq.dropna(inplace=True)
                     df_train_mod_analysis_freq          = df_train_mod_analysis_freq.resample('W').sum()
+                    
+                    ### REMOVE USELESS WEEK                    
+#                    df_train_mod_analysis_freq = df_train_mod_analysis_freq[df_train_mod_analysis_freq['mod'] != 0]
+                                        
                     df_train_mod_analysis_freq['perc'] = df_train_mod_analysis_freq['good_pred']/(df_train_mod_analysis_freq['good_pred']+df_train_mod_analysis_freq['bad_pred'])
                     df_train_mod_analysis_freq['gain'] = df_train_mod_analysis_freq['good_pred']*((mod/10.0)-1)-df_train_mod_analysis_freq['bad_pred']
-    
                     GAIN_MEAN  = df_train_mod_analysis_freq['gain'].mean()
                     GAIN_STD   = df_train_mod_analysis_freq['gain'].std()
-                    limit_mean_min = 0.0
-                    limit_std_max  = 0.8
-                    if GAIN_MEAN > limit_mean_min and GAIN_STD <= limit_std_max and len(df)>10:
+                    limit_mean_min = dict_training_option[sport]['limit_mean_min']
+                    limit_std_max  = dict_training_option[sport]['limit_std_max']
+                    if GAIN_MEAN > limit_mean_min and GAIN_STD <= limit_std_max and len(df) > (len(df_train_mod_analysis_freq)/4.0):
                         a_list.append([GAIN_MEAN, GAIN_STD, df_train_mod_analysis_freq['gain'].sum(), len(df), mod, i*step_diff_bet, pays])
+#                        return df_train_mod_analysis_freq           
                         
             if len(a_list) != 0:
                 df_a_list = pd.DataFrame(a_list)
                 df_a_list.columns = ['GAIN_MEAN', 'GAIN_STD', 'sum', 'len_df', 'mod', 'diff', 'pays']
-                df_a_list['name'] = df_a_list['mod'].map(str) + '_' + df_a_list['diff'].map(str)
+                df_a_list['name'] = df_a_list['mod'].map(str) + '_' + df_a_list['diff'].map(str) + '/' + df_a_list['GAIN_MEAN'].apply(lambda x : str(int(x*100)))
 
         list_pays = df_a_list.pays.unique().tolist()
-        fig, axes = plt.subplots(nrows=len(list_pays)/4+1, ncols=4, sharex=True, sharey=True)
+        fig, axes = plt.subplots(nrows=len(list_pays)/3+1, ncols=3, sharex=True, sharey=True)
         for ax, pays in zip(axes.flat, list_pays):
             dict_result[sport].update({pays:{}})
             print '\n\n\n**********ùùùùùùùù'
             print pays
             print '**********ùùùùùùùù'
-            df_a_list[df_a_list.pays == pays].plot(kind='scatter',x='GAIN_MEAN',y='GAIN_STD', title=pays, ax=ax)
-            df_a_list[df_a_list.pays == pays][['GAIN_MEAN','GAIN_STD','name']].apply(lambda x: ax.text(*x),axis=1)
+            fig, ax = plt.subplots()
+
+            df_a_list['ratio'] = df_a_list['sum']/df_a_list['len_df']
+            df_a_list['GAIN_ratio'] = df_a_list['GAIN_STD']/df_a_list['GAIN_MEAN']
+            df_a_list[df_a_list.pays == pays].plot(kind='scatter',x='sum',y='GAIN_STD', c='GAIN_MEAN', colormap='Reds', title=pays, ax=ax)
+            df_a_list[df_a_list.pays == pays][['sum','GAIN_STD','name']].apply(lambda x: ax.text(*x, fontsize=8),axis=1)
 
             dict_temp_temp = {}
             list_temp_parameter_sport = []     
@@ -1161,12 +1184,14 @@ def optimisation_8(df_train, df_test, dict_training_option):
                 diff    = df_a_list[df_a_list.pays == pays].iloc[item]['diff']
                 GAIN_MEAN = df_a_list[df_a_list.pays == pays].iloc[item]['GAIN_MEAN']
                 GAIN_STD  = df_a_list[df_a_list.pays == pays].iloc[item]['GAIN_STD']
+                sum_item  = df_a_list[df_a_list.pays == pays].iloc[item]['sum']
                 mod_step = 1
 #                list_temp_parameter_sport.append([round(mod/10.0,2), round((mod+mod_step)/10.0,2), GAIN_MEAN, GAIN_STD, 'S', '', '', round(diff,2)])
 
+                """
                 ### find lowest std                
                 try:
-                    if dict_temp_temp[mod]['GAIN_STD'] > GAIN_STD:
+                    if dict_temp_temp[mod]['sum'] < sum_item:
                         dict_temp_temp[mod]['GAIN_STD'] = GAIN_STD
                         dict_temp_temp[mod]['diff'] = diff
 
@@ -1179,15 +1204,45 @@ def optimisation_8(df_train, df_test, dict_training_option):
                 GAIN_STD  = value_mod['GAIN_STD']
                 diff      = value_mod['diff']
                 list_temp_parameter_sport.append([round(mod/10.0,2), round((mod+mod_step)/10.0,2), GAIN_MEAN, GAIN_STD, 'S', '', '', round(diff,2)])
+                """
+                
                 ### shortcut
-                dict_ok.update({mod:{'result_gain':0 , 'diff':diff, 'perc':0}})
+#                dict_ok.update({mod:{'result_gain':0 , 'diff':diff, 'perc':0}})
 
+            ### FIND BEST COMPROMIZE
+            list_mod = df_a_list[u'mod'].unique()
+            bb = pd.DataFrame()
+            for mod in list_mod:                
+                df = df_a_list[df_a_list[u'mod'] == mod][['GAIN_MEAN', 'GAIN_STD', 'ratio', 'sum']]
+                df_norm = (df - df.min()) / (df.max() - df.min())
+                df_norm.columns = ['GAIN_MEAN_SC', 'GAIN_STD_SC', 'ratio_SC', 'sum_SC']
+                aa = pd.concat((df_a_list[df_a_list[u'mod'] == mod], df_norm),axis=1)
+                bb = pd.concat((bb, aa))
+            bb.fillna(0, inplace=True)
+            bb['GAIN_STD_SC'] = bb['GAIN_STD_SC'].apply(lambda x : x*(-1.0)+1)
+            bb['COMPROMIZE_SC'] = bb['GAIN_MEAN_SC']*bb['GAIN_STD_SC']*bb['ratio_SC']*bb['sum_SC']
+            bb['COMPROMIZE'] = bb['GAIN_MEAN']/bb['GAIN_STD']*bb['ratio']*bb['sum']
+            bb.replace([np.inf, -np.inf], 0, inplace=True)
+            df_a_list = bb.copy()
+            
+            for mod in list_mod:                
+                cc = pd.DataFrame(df_a_list[df_a_list[u'mod'] == mod].sort_values('COMPROMIZE', ascending=False).iloc[0]).T
+                mod     = cc['mod']
+                diff    = cc['diff']
+                GAIN_MEAN = cc['GAIN_MEAN']
+                GAIN_STD  = cc['GAIN_STD']
+                sum_item  = cc['sum']
+                mod_step = 1
+                if cc['COMPROMIZE'].values[0] >= dict_training_option[sport]['COMPROMIZE_MIN']:
+                    list_temp_parameter_sport.append([round(mod/10.0,2), round((mod+mod_step)/10.0,2), GAIN_MEAN, GAIN_STD, 'S', '', '', round(diff,2)])
+                
+                
             dict_temp_parameter_sport.update({sport:list_temp_parameter_sport, 'option':dict_training_option})
             
 #            if pays == 'brazil': ee
             ### VALIDATION
             df_test_sport = df_test[df_test.pays == pays].copy()
-#            df_win, df_loss, dict_ok = test_tes(df_test_sport, dict_temp_parameter_sport)
+            df_win, df_loss, dict_ok = test_tes(df_test_sport, dict_temp_parameter_sport)
             dict_result[sport][pays].update(dict_ok)
             
             
@@ -1196,6 +1251,10 @@ def optimisation_8(df_train, df_test, dict_training_option):
             ax = df_a_list[df_a_list.pays == pays].plot(kind='scatter',x='GAIN_MEAN',y='GAIN_STD', title=pays)
             df_a_list[df_a_list.pays == pays][['GAIN_MEAN','GAIN_STD','name']].apply(lambda x: ax.text(*x),axis=1)
             """
+           
+
+                
+                
                 
     return dict_result, df_a_list
 

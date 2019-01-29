@@ -58,7 +58,6 @@ df_merge_single['bad_pred']                           = 0
 df_merge_single.bad_pred[df_merge_single.prediction != df_merge_single.winner]  = 1
 df_merge_single.match_date                = df_merge_single.match_date.apply(lambda x : datetime.strptime(x, '%Y-%m-%d %H:%M:%S'))
 
-
 # =============================================================================
 # 
 # =============================================================================
@@ -93,6 +92,11 @@ df_parameter_sport          = pd.DataFrame()
 
 ########
 
+
+#datetime_limit = datetime(2019, 01, 11, 0, 46, 43, 100000)
+#df_merge_single_modif  = df_merge_single_modif[(df_merge_single_modif.match_date > datetime_limit)]
+
+
 for day_shift in list_day_shift:
 #    mise       = bankroll*3/100
     result     = 0
@@ -119,7 +123,6 @@ for day_shift in list_day_shift:
         print date_min.strftime('%d, %B %Y - %a'), ' / ', date_max.strftime('%d, %B %Y - %a')    
         with open('../model/local/dict_parameter.json') as json_file:  
             dict_parameter = json.load(json_file)
-        
         with open('../model/local/dict_parameter_sport.json') as json_file:  
             dict_parameter_7 = json.load(json_file)
             
@@ -127,7 +130,8 @@ for day_shift in list_day_shift:
         df_test = df_single.copy()
         df_test = df_single[df_single.sport == 'esports']        
         """
-#        df_test = df_test[df_test["ligue"].str.contains('Spain')]
+        df_test = df_test[df_test["ligue"].str.contains('England')]
+#        df_test = df_test[df_test["ligue"].str.contains('La Liga')]
 #        df_test = df_test[~df_test["ligue"].str.contains('Cup')]
 #        df_test = df_test[~df_test["ligue"].str.contains('Cop')]
 #        df_test = df_test[~df_test["ligue"].str.contains('Coup')]
@@ -137,8 +141,8 @@ for day_shift in list_day_shift:
 
         if len(df_test) != 0:
             df_test['pays'] = df_test.ligue.apply(lambda x : x.split('-')[0].strip().lower())
-            df_single_filter = optimisation_8_apply(df_test, dict_parameter)
-#            df_single_filter = optimisation_7_apply(df_test, dict_parameter_7)
+#            df_single_filter = optimisation_8_apply(df_test, dict_parameter)
+            df_single_filter = optimisation_7_apply(df_test, dict_parameter_7)
 
         else:
             df_single_filter = pd.DataFrame()
@@ -316,7 +320,6 @@ for day_shift in list_day_shift:
         print ''
         
         try:
-            ee
             list_pays_win_loss  = list(set(df_win.pays.unique().tolist()+df_loss.pays.unique().tolist()))
             for pays in list_pays_win_loss:
                 print '*****   ', pays
@@ -341,6 +344,7 @@ for day_shift in list_day_shift:
                     print sport, '=> ', total.rjust(4), 'bet /', total_gain.rjust(4), 'euros /', round(100*len(df_win_pays[df_win_pays.sport == sport])/float(len(df_win_pays[df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays.sport == sport])),2),'%'
                     list_mod_win_loss = list(set(df_win_pays[u'mod'][df_win_pays.sport == sport].unique().tolist()+df_loss_pays[u'mod'][df_loss_pays.sport == sport].unique().tolist()))
                     for mod in list_mod_win_loss:
+                        ee
                         print '*', round(mod*0.1,1), '-', round((mod+1)*0.1,1), '=>', str(len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays[u'mod'] == mod][df_loss_pays.sport == sport])).rjust(4), 'bet /', str(int(sum(df_win_pays['gain'][df_win_pays[u'mod'] == mod])+sum(df_loss_pays['gain'][df_loss_pays[u'mod'] == mod]))).rjust(4)   , 'euros /',  round(100*len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])/float(len(df_win_pays[df_win_pays[u'mod'] == mod][df_win_pays.sport == sport])+len(df_loss_pays[df_loss_pays[u'mod'] == mod][df_loss_pays.sport == sport])),1),'%'
         except Exception, e:
             print e

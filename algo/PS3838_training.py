@@ -82,16 +82,19 @@ for i, file_soccer in enumerate(list_soccer):
     df_soccer = pd.concat((df_soccer, df_soccer_temp))
 
 """
-os.system('wget http://34.76.65.82:8080/bet/prod/bet/dataset/local/soccer/df_ALL_soccer.xls')
+os.system('wget http://35.195.191.78:8080/bet/prod/bet/dataset/local/soccer/df_ALL_soccer.xls')
 os.system('mv "df_ALL_soccer.xls" "../dataset/local/soccer/df_ALL_soccer.xls"')
 """
 
 df_ALL = pd.DataFrame.from_csv('../dataset/local/soccer/df_ALL_soccer.xls', encoding='utf-8')
 df_soccer = df_ALL[df_ALL.sport == 'soccer']
 #df_soccer = pd.concat((df_soccer,df_ALL[df_ALL.sport == 'soccer']))
-df_soccer['bet_1'] = df_soccer.bet_1.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
-df_soccer['bet_2'] = df_soccer.bet_2.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
-df_soccer['bet_X'] = df_soccer.bet_X.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+#df_soccer['bet_1'] = df_soccer.bet_1.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+#df_soccer['bet_2'] = df_soccer.bet_2.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+#df_soccer['bet_X'] = df_soccer.bet_X.apply(lambda x : (x/100)+1 if x>0 else (100/(-x))+1)
+
+
+#df_soccer = df_soccer[df_soccer["ligue"].str.contains('Tercera')]
 
 ###
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Cup')]
@@ -99,13 +102,30 @@ df_soccer['bet_X'] = df_soccer.bet_X.apply(lambda x : (x/100)+1 if x>0 else (100
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Coup')]
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('Euro')]
 #df_soccer = df_soccer[~df_soccer["ligue"].str.contains('World')]
-
 #df_soccer = df_soccer[df_soccer["pays"].str.contains('israel')]
+
 
 """
 ### old dataset runnning
 df_ALL = df_merge_single.copy()
 df_soccer = df_ALL[df_ALL.sport == 'soccer']
+#df_soccer = df_ALL[df_ALL.sport == 'e sports']
+#df_soccer = df_ALL[df_ALL.sport == 'volleyball']
+#df_soccer = df_ALL[df_ALL.sport == 'handball']
+
+df_soccer['sport']       = 'soccer'
+
+#datetime_limit = datetime(2019, 01, 11, 0, 46, 43, 100000)
+#df_soccer  = df_soccer[(df_soccer.match_date < datetime_limit)]
+
+from sklearn.model_selection import train_test_split
+df_train, df_test = train_test_split(df_soccer, test_size=0.5)
+
+df_train['ligue'] = 'ALL - ALL'
+df_train['pays'] = 'ALL'
+df_test['pays'] = 'ALL'
+dict_parameter_sport, df_a_list = optimisation_8(df_train, df_test, dict_training_option)
+
 """
   
 df_soccer['sport']       = 'soccer'
@@ -137,21 +157,33 @@ df_soccer.match_date = df_soccer.match_date.apply(lambda x : datetime.fromtimest
 ###
 #df_soccer = pd.concat((df_soccer,df_merge_single[df_merge_single.sport == 'soccer']))
 
-datetime_limit = datetime(2018, 12, 12, 0, 46, 43, 100000)
-df_test  = df_soccer[(df_soccer.match_date > datetime_limit)]# & (df_soccer.match_date < datetime(2018, 11, 20, 0, 46, 43, 100000))]
-df_train = df_soccer[(df_soccer.match_date < datetime_limit)]# & (df_soccer.match_date > datetime(2016, 9, 9, 0, 46, 43, 100000))]
 
 """
+df_soccer = df_soccer[df_soccer.pays == 'spain']
+df_soccer = df_soccer[df_soccer["ligue"].str.contains('LaLiga2')]
+"""
+
+datetime_limit = datetime(2018, 9, 21, 0, 46, 43, 100000)
+df_test  = df_soccer[(df_soccer.match_date > datetime_limit)]# & (df_soccer.match_date < datetime(2018, 11, 20, 0, 46, 43, 100000))]
+df_train = df_soccer[(df_soccer.match_date < datetime_limit)]# & (df_soccer.match_date > datetime(2017, 9, 9, 0, 46, 43, 100000))]
+ee
+"""
 df_train.pays.value_counts()
+df_train.ligue.value_counts()
+
 """
 
 ### OPTIONS
 dict_training_option = {'soccer':{
-                                'mod_value':       0.1,
-                                'limit_bet':       2.0,
-                                'limit_DC':        0.0,
-                                'limit_perf_min':  0,
-                                'force_mode':      '',
+                                'mod_value':                0.1,
+                                'limit_bet':                1.,
+                                'limit_DC':                 0.0,
+                                'limit_perf_min':           0,
+                                'force_mode':               '',
+                                'limit_mean_min':           0.0,
+                                'limit_std_max':            5.8,
+                                'nbr_min_match_by_pays':    10,
+                                'COMPROMIZE_MIN':           0.5,
                                  }}
 
 
